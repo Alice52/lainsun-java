@@ -8,8 +8,13 @@ And this file just interprets the directory information at that level.
 ## plane content
 
 ```java
-    |-- TOOL-- |-- GIT
+    |--COMMON--|-- GIT
     |          |-- MD
+    |          |-- VSCODE
+    |          |-- CODINGSTYLE
+    |          |-- IDE-SHOTCUT
+    |          |-- BROWSER-TIPS
+    |          |-- PROGRAMMING-PARADIGM
     |
     |-- CODE-- |-- SE
     |          |-- EE
@@ -18,6 +23,8 @@ And this file just interprets the directory information at that level.
     |          |-- DB
     |
     |--  SE
+    |
+    |--  DESIGN-MODEL
     |
     |--  EE
     |
@@ -32,11 +39,15 @@ And this file just interprets the directory information at that level.
 
 ## special content
 
-### 1. TOOL
+### 1. COMMON
 
-- [GIT](./tools/git/tool-git.md)
-- [MARKDOWN](./tools/markdown/markdown.md)
-- [VSCODE](./tools/vscode/tool-vscode.md)
+- [GIT](./common/git/tool-git.md)
+- [MARKDOWN](./common/markdown/markdown.md)
+- [VSCODE](./common/vscode/tool-vscode.md)
+- [CODINGSTYLE](./common/codingstyle/ali-codingstyle.pdf)
+- [IDE-SHOTCUT](./common/shorcut.md)
+- [BROWSER-TIPS](./common/browser_tips.md)
+- [PROGRAMMING-PARADIGM](./common/programming-paradigm.md)
 
 ### 2. [CODE](./code/README.md)
 
@@ -46,7 +57,9 @@ And this file just interprets the directory information at that level.
 - [MQ](./code/mq/README.md)
 - [DB](./code/db/README.md)
 
-### 3. [SE](./se/README.md)
+### 3. [DESIGN-MODEL](./design-model/README.md)
+
+### 4. [SE](./se/README.md)
 
 - [static](./se/static.md)
 - [this](./se/this.md)
@@ -66,15 +79,15 @@ And this file just interprets the directory information at that level.
 - [Proxy](./se/Proxy.md)
 - [JVM](./se/JVM.md)
 - [GC](./se/GC.md)
-- [Design-Model](./se/design-model/README.md)
+- [Java8](./se/java8/README.md)
 
-### 4. [EE](./ee/README.md)
+### 5. [EE](./ee/README.md)
 
-### 5. [JOB](./job/README.md)
+### 6. [JOB](./job/README.md)
 
-### 6. [MQ](./mq/README.md)
+### 7. [MQ](./mq/README.md)
 
-### 7. [DB](./db/README.md)
+### 8. [DB](./db/README.md)
 
 ## contributor
 
