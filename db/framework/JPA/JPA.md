@@ -31,7 +31,7 @@
 - 3. 优点:
   ```
   1. 标准化
-  2. 简单易用，集成方便
+  2. 简单易用, 集成方便
   3. 可媲美JDBC的查询能力[JPQL]
   4. 支持面向对象的高级特性
   ```
@@ -71,7 +71,7 @@
       <!--
         配置使用什么ORM 产品作为JPA 的实现
           1.实际上配置的是 javax.persistence.spi.PersistenceProvider 接口的实现类
-          2.若JPA项目中只有一个JPA的实现产品，则也可以不配置该节点。
+          2.若JPA项目中只有一个JPA的实现产品, 则也可以不配置该节点.
       -->
       <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
       <!-- 添加持久化类-->
@@ -84,13 +84,13 @@
           <property name="hibernate.connection.username" value="root"/>
           <property name="hibernate.connection.password" value="Yu1252068782?"/>
 
-          <!-- 配置JPA 实现产品的基本属性，配置hibernate 的基本属性 -->
+          <!-- 配置JPA 实现产品的基本属性, 配置hibernate 的基本属性 -->
           <!-- 自动显示SQL -->
           <property name="hibernate.show_sql" value="true"/>
           <!-- 格式化sql -->
           <property name="hibernate.format_sql" value="true"/>
           <!--生成数据表的策略-->
-          <!--注意这个属性，自动生成的文件前面没有 hibernate，要加上 hibernate -->
+          <!--注意这个属性, 自动生成的文件前面没有 hibernate, 要加上 hibernate -->
           <property name="hibernate.hbm2ddl.auto" value="update"/>
           <!-- 使用 MySQL8Dialect -->
           <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
@@ -156,24 +156,83 @@
 ### JPA Annotation
 
 - @Entity
-- @Table
+  - 表明该类为实体类, 将映射到指定的数据库表.
+- @Table: 实体类与数据库表名称不一致.
 
-  - 用 table 来生成主键详解
+  ```java
+  @Table(name = "TABLE_NAME")
+  ```
+
+  - name 属性: 指定数据库表名
+  - 用 table 来生成主键详解: 数据库中有一张数据表 `jpa_id_generators` 用于生产主键值. `好处在于数据库的迁移性`
+    ```java
+    @TableGenerator(name="ID_GENERATOR",
+      table="jpa_id_generators",
+      pkColumnName="PK_NAME",
+      pkColumnValue="CUSTOMER_ID",
+      valueColumnName="PK_VALUE",
+      allocationSize=100)
+    @GeneratedValue(strategy=GenerationType.TABLE,generator="ID_GENERATOR")
+    ```
+  - catalog 和 schema: 分别用于设置所属数据库目录和模式
 
 - @Id
+  - 表明主键列
+  - [推荐]置于属性的 getter 方法之前
 - @GeneratedValue
-- @Column
-- @Basic
+  ```java
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  ```
+  - 标注主键的生成策略
+  - type
+    - IDENTITY: 自增主键字段
+    - AUTO[默认]: JPA 自动选择合适的策略
+    - SEQUENCE: 序列产生主键, @SequenceGenerator 注解指定序列名, MySql 不支持这种方式
+    - TABLE: 通过表产生主键, 框架借由表模拟序列产生主键, 使用该策略可以使应用更易于数据库移植
+- @Basic: 默认的字段注解[不写]
+- @Column: 指定实体的属性对应数据表的字段
+  - name: 数据库字段名
+  - columnDefinition: 数据库字段数据类型
+  - unique
+  - nullable
+  - length
 - @Transient
-- @Temporal
+  - 不映射到数据库字段
+- @Temporal: 指定 Date 数据类型的精度; 数据库中的 Date 类型有三种: TEAR, TIME, DATE, DATETIME, TIMESTAMP
+  ```java
+  @Temporal(TemporalType.TIME)
+  ```
+  - type:
+    - TIME: 时间
+    - DATE: 日期
+    - DATETIME: 时间日期
 
 ### JPA API
 
 #### Persistence
 
-- EntityManagerFactory
+- createEntityManagerFactory(String persistenceUnitName) 用来创建 `EntityManagerFactory` 实例
 
-#### EntityManager
+#### EntityManagerFactory
+
+- createEntityManager(): 用来创建 `EntityManager` 实例
+- createEntityManager(Map map): map 提供 EntityManager 的属性
+- isOpen(): 检查 EntityManagerFactory 是否处于打开状态, 默认打开[只有调用 close()方法才关闭]
+- close()：关闭 EntityManagerFactory, 释放资源
+
+#### EntityManager: `持久化核心`
+
+##### Knowledge
+
+- 实体的状态:
+  ```java
+  新建状态: 新创建的对象, 尚未拥有持久性主键.
+  持久化状态: 已经拥有持久性主键并和持久化建立了上下文环境
+  游离状态: 拥有持久化主键, 但是没有与持久化建立上下文环境
+  删除状态: 拥有持久化主键, 已经和持久化建立上下文环境, 但是从数据库中删除.
+  ```
+
+##### API
 
 - find(Class<T> entityClass,Object primaryKey)
 - getReference(Class<T> entityClass,Object primaryKey)
