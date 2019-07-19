@@ -1,6 +1,7 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+**Table of Contents** _generated with [DocToc](https://github.com/thlorenz/doctoc)_
 
 - [一、linux](#%E4%B8%80linux)
 - [二、用户](#%E4%BA%8C%E7%94%A8%E6%88%B7)
@@ -30,10 +31,12 @@ uname -a
 # 1.2 查看 linux 系统版本
 lsb_release -a
 
-# 2 查看进程
+# 2.1 查看进程
 ps -ef | grep tomact | grep -v grep # 根据进程名查看
 lsof -i:8080 #根据端口号查看
 netstat -anp | grep 8080 #根据端口号查看
+# 2.2 查看进程服务状态
+systemctl status mssql-server
 
 # 3. 查看历史命令
 history |grep xxx
@@ -231,9 +234,21 @@ sudo service apache2 stop
 
 # 2.1 查看防火墙状态
 service firewalld status
+systemctl status firewalld
 # 2.2 关闭防火墙
-sudo service iptables stop
+sudo service firewalld/iptables stop
+sudo ufw disable
+# 2.2 开启防火墙
+sudo service firewalld/iptables start
+sudo ufw enable
+# 2.3 重启防火墙
+sudo ufw reload
 
+# 3.1 放行端口
+sudo ufw allow 27017
+
+# 4.1 查看服务状态
+systemctl status mssql-server
 
 ## Apache
 # 1. 查看 Apache 的 version

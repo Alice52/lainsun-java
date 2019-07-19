@@ -51,6 +51,10 @@
 | CTRL + SHIFT + ENTER  |      向下插入一行      |
 |    SHIFT + ALT + ↑    |      向下移动一行      |
 |      ALT + ENTER      |          导包          |
+|      SHIFT + F6       |         rename         |
+|       CTRL + H        |         类层次         |
+|    CTRL + ALT + B     |         类层次         |
+|       CTRL + B        |         进入类         |
 
 ## [VsCode 快捷键](./vscode/tool-vscode.md)
 
@@ -94,6 +98,7 @@
 |     Shift + F8     |     跳转到上一个错误或者警告     |
 | Ctrl + Shift + Tab |       切换到最近打开的文件       |
 |  Alt + Left/Right  |            向前/向后             |
+|      CTRL + B      |            收放目录栏            |
 
 - 查询
 
