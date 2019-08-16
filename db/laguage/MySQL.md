@@ -32,6 +32,9 @@ SHOW GRANTS;
 
 -- 7. 查看数据库服务器的错误
 SHOW WARNINGS/ERRORS;
+
+-- 8. View the database engine
+show engines;
 ```
 
 ## 1. SELECT
@@ -56,6 +59,46 @@ limit LENGTH OFFSET START_POSITION
    1.1 `%:` 表示任何字符出现任意次数
    1.2 `_:` 表示只匹配单个字符
 2. `where ... BINARY REGEXP`
+
+### JOIN
+
+#### 等值连接
+#### 非等值连接
+#### 自连接
+
+## 2. UPDATE
+```sql
+UPDATE TABLE_NAME SET COLUMN = VALUE 
+WHERE ...
+```
+
+## 3. INSETR
+```sql
+INSERT INTO TABLE_NAME VALUES (VALUE1, VALUE2,....)
+INSERT INTO TABLE_NAME (COLUMN1, COLUMN1,...) VALUES (VALUE1, VALUE2,....)
+```
+
+## 4. DELETE
+```sql
+DELETE FROM TABLE_NAME WHERE ...
+-- truncate 删除带自增长的列的表后，如果再插入数据，数据从1开始
+truncate table 表名
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## 函数
 
@@ -147,6 +190,8 @@ limit LENGTH OFFSET START_POSITION
 
 1. NULL 无值(no value), 它与字段包含 0、空字符串或仅仅包含空格不同
 2. WHERE 后的 AND 优先级高于 OR.
+
+---
 
 ## Coding
 
