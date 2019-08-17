@@ -174,10 +174,13 @@ git cherry-pick COMMIT_ID
   ```
 
   ```shell
-  git pull origin master
   git log # 查看要 rebase 到的点
   git rebase -i COMMITID # 消除之间的, 并将最后一个改为 squash
   # 退出之后, 删除不要的 commit message
+  # cannot merge [conflict]
+  git pull origin master
+  # fix conflict
+  git push -f
   ```
 
 #### MV/RM

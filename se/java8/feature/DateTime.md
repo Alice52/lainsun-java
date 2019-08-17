@@ -22,6 +22,7 @@
   ```
 
 - 改为线程安全 2: 使用 ThreadLocal
+
   ```java
   // 1. 自定义 DateFormatThreadLocal
   public class DateFormatThreadLocal {
@@ -53,7 +54,8 @@
   pool.shutdown()
   ```
 
-- UTC 
+- UTC
+
 ```java
 import java.io.IOException;
 import java.text.ParseException;
@@ -64,7 +66,7 @@ import java.util.TimeZone;
 import org.json.JSONException;
 
 public final class UTCTimeUtil {
-    
+
     /**
      * util class should not be initial
      */
@@ -73,7 +75,7 @@ public final class UTCTimeUtil {
 
     /**
      * Get calendar that time zone is UTC
-     * 
+     *
      * @param date
      * @return
      */
@@ -87,41 +89,41 @@ public final class UTCTimeUtil {
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         return calendar;
     }
-    
+
     /**
      * Convert local time to utc time (time subtract local timezone offset)
-     * 
+     *
      * @param date
      * @param local
      * @return
      */
     public static Date localToUtc(Date date, TimeZone local) {
-        
+
         if (date == null || local == null) {
             return null;
         }
-        
+
         Date utc = null;
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.add(Calendar.MILLISECOND, 0 - local.getRawOffset() - local.getDSTSavings());
         utc = calendar.getTime();
-        
+
         return utc;
     }
-    
+
     /**
      * Convert local time to utc time (time subtract local timezone offset)
-     * 
+     *
      * @param date
      * @param local
      * @return
      */
     public static Date localToUtc(Date date) {
-        
+
         return localToUtc(date, TimeZone.getDefault());
     }
-    
+
     /**
      * Convert utc time to local time (time add local timezone offset)
      * @param date
@@ -129,7 +131,7 @@ public final class UTCTimeUtil {
      * @return
      */
     public static Date utcToLocal(Date date, TimeZone local) {
-        
+
         Date localDate = null;
         if (date != null) {
             Calendar calendar = Calendar.getInstance();
@@ -137,10 +139,10 @@ public final class UTCTimeUtil {
             calendar.add(Calendar.MILLISECOND, local.getRawOffset() + local.getDSTSavings());
             localDate = calendar.getTime();
         }
-        
+
         return localDate;
     }
-    
+
     /**
      * Convert utc time to local time (time add local timezone offset)
      * @param date
@@ -148,11 +150,12 @@ public final class UTCTimeUtil {
      * @return
      */
     public static Date utcToLocal(Date date) {
-        
+
         return utcToLocal(date, TimeZone.getDefault());
     }
 }
 ```
+
 ## JDK 1.8
 
 - 改为线程安全 1: java8
@@ -204,9 +207,10 @@ public final class UTCTimeUtil {
 - ZonedTime
 - ZonedDateTime
 
-
 ## Hi
-- 在转换为 entity 时减小8小时后再插入
+
+- 在转换为 entity 时减小 8 小时后再插入
+
 ```java
 import java.util.Comparator;
 import java.util.Date;
@@ -224,7 +228,7 @@ public class UtcTimestampType extends
         AbstractSingleColumnStandardBasicType<Date> implements
         VersionType<Date>, LiteralType<Date> {
     private static final long serialVersionUID = 5848852471383340492L;
-    
+
     public static final UtcTimestampType INSTANCE = new UtcTimestampType();
 
     public UtcTimestampType() {
@@ -263,8 +267,6 @@ public class UtcTimestampType extends
 }
 
 
-
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -293,7 +295,7 @@ public class UtcTimestampTypeDescriptor extends TimestampTypeDescriptor  {
             @Override
             protected void doBind(PreparedStatement st, X value, int index, WrapperOptions options) throws SQLException {
                 Timestamp timestamp = javaTypeDescriptor.unwrap( value, Timestamp.class, options );
-                
+
                 if (timestamp != null) {
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTime(UTCTimeUtil.localToUtc(timestamp));
@@ -308,9 +310,9 @@ public class UtcTimestampTypeDescriptor extends TimestampTypeDescriptor  {
         return new BasicExtractor<X>( javaTypeDescriptor, this ) {
             @Override
             protected X doExtract(ResultSet rs, String name, WrapperOptions options) throws SQLException {
-                
+
                 Timestamp timestamp = rs.getTimestamp( name);
-                
+
                 if (timestamp != null) {
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTime(UTCTimeUtil.utcToLocal(timestamp));
@@ -322,13 +324,12 @@ public class UtcTimestampTypeDescriptor extends TimestampTypeDescriptor  {
     }
 }
 
-
-
-// use 
+// use
 @Column(name = "GamingDay")
 @Type(type = "**.UtcTimestampType")
 @DateTimeFormat(style = "MM")
 private Date gamingDay;
 
-// then if get from json, will execute getExtractor utcToLocal; doBind and insert DB will localToUtc.
+// then if get data from database use JDBC, will execute getExtractor utcToLocal;
+// insert data into database use JDBC, will execute doBind localToUtc.
 ```
