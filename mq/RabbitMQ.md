@@ -14,6 +14,7 @@
   5. vrtual hosts: 虚拟主机[数据库]
 - 工作流程
   ![avatar](./../static/image/mq/RabbitMQModel.png)
+  ![avatar](./../static/image/mq/rabbitmq.png)
 
 ### install on linux os
 
@@ -51,7 +52,8 @@ service rabbitmq-server restart  # 重启
 - 分为 4 类: Direct、topic、headers、Fanout
 
   1. Direct 默认的交换机模式[最简单]: 即 发送者发送消息时指定的 `key` 与创建队列时指定的 `BindingKey` 一样时, 消息将会被发送到该消息队列中.
-  2. topic 转发信息主要是依据 `通配符`, 发送者发送消息时指定的 `key` 与 `队列和交换机的绑定时` 使用的 `依据模式(通配符+字符串)` 一样时, 消息将会被发送到该消息队列中.
+  2. [可以模糊匹配]topic 转发信息主要是依据 `通配符`, 发送者发送消息时指定的 `key` 与 `队列和交换机的绑定时` 使用的 `依据模式(通配符+字符串)` 一样时, 消息将会被发送到该消息队列中.
+     - `#匹配 0 个或多个单词，\*匹配一个单词`
   3. headers 是根据 `一个规则进行匹配`, 而发送消息的时候 `指定的一组键值对规则` 与 在消息队列和交换机绑定的时候会指定 `一组键值对规则` 匹配时, 消息会被发送到匹配的消息队列中.
   4. Fanout 是 `路由广播` 的形式, 将会把消息发给绑定它的全部队列, 即便设置了 key, 也会被忽略 `[相当于发布订阅模式]`.
 
@@ -94,4 +96,21 @@ service rabbitmq-server restart  # 重启
    - 投递消息时, 打开了消息的持久化, 那么即使是内存节点, 数据还是安全的放在磁盘
 2. 一个 rabbitmq 集群中可以共享 user, vhost, queue, exchange
    - 所有的数据和状态都是必须在所有节点上复制的`[除外:只属于创建它的节点的消息队列]`
-   -
+
+## 小总结
+
+1. routing key
+
+- direct 相当于 p2p 的模式, 非订阅者模式; topic/fanout/header[不常用]是订阅者模式
+- queue 声明并不和 `routing key` 关联; 但是 publish 时会指定 `routing key` 和 `exchange`; 最终通过 `dobind` 将 `queue` 和 `exchange` 绑定时指定 `routing key`
+
+  ```java
+  // queue declare
+  channel.queueDeclare(Constants.QUEUE_NAME, false, false, false, null);
+
+  // exchange declare
+  channel.exchangeDeclare(Constants.EXCHANGE_NAME, BuiltinExchangeType.TOPIC);
+
+  // binding
+  channel.queueBind(Constants.QUEUE_NAME, Constants.EXCHANGE_NAME, Constants.ROUTING_KEY);
+  ```

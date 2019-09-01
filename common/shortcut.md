@@ -29,32 +29,42 @@
 
 ## IDEA 快捷键
 
-|       SHORTCUT        |        FUNCTION        |
-| :-------------------: | :--------------------: |
-|      ALT + ENTER      |        强制转换        |
-|         sout          |          输出          |
-|         fori          |          循环          |
-|         itar          |        循环数组        |
-|         iter          |        增强 for        |
-|         itco          |    迭代 Collection     |
-|         iten          |    遍历 Enumeration    |
-|         itli          |       遍历 list        |
-|         ittok         | 生成 String token 遍历 |
-|         itve          |  生成 Vector 数组迭代  |
-|         itit          |        强制转换        |
-|    CTRL + ALT + B     |        查看源码        |
-|         psvm          |          main          |
-|        ALT + 7        |       查看类方法       |
-|  CTRL + SHIFT + F10   |       Test 执行        |
-|    CTRL + ALT + V     |      自动生成变量      |
-| CTRL + ENTER [ + ALT] |      向上插入一行      |
-| CTRL + SHIFT + ENTER  |      向下插入一行      |
-|    SHIFT + ALT + ↑    |      向下移动一行      |
-|      ALT + ENTER      |          导包          |
-|      SHIFT + F6       |         rename         |
-|       CTRL + H        |         类层次         |
-|    CTRL + ALT + B     |         类层次         |
-|       CTRL + B        |         进入类         |
+|       SHORTCUT        |         FUNCTION         |
+| :-------------------: | :----------------------: |
+|      ALT + ENTER      | 强制转换 导入包,自动修正 |
+|         sout          |           输出           |
+|         fori          |           循环           |
+|         itar          |         循环数组         |
+|         iter          |         增强 for         |
+|         itco          |     迭代 Collection      |
+|         iten          |     遍历 Enumeration     |
+|         itli          |        遍历 list         |
+|         ittok         |  生成 String token 遍历  |
+|         itve          |   生成 Vector 数组迭代   |
+|         itit          |         强制转换         |
+|    CTRL + ALT + B     |         查看源码         |
+|         psvm          |           main           |
+|        ALT + 7        |        查看类方法        |
+|  CTRL + SHIFT + F10   |        Test 执行         |
+|    CTRL + ALT + V     |       自动生成变量       |
+| CTRL + ENTER [ + ALT] |       向上插入一行       |
+| CTRL + SHIFT + ENTER  |       向下插入一行       |
+|    SHIFT + ALT + ↑    |       向下移动一行       |
+|      ALT + ENTER      |           导包           |
+|      SHIFT + F6       |          rename          |
+|       CTRL + H        |          类层次          |
+|    CTRL + ALT + B     |          类层次          |
+|       CTRL + B        |          进入类          |
+|        Ctrl+N         |          查找类          |
+|     Ctrl+Shift+N      |         查找文件         |
+|      Ctrl+Alt+O       |     优化导入的类和包     |
+|  Ctrl+E Alt+Shift+C   |      最近更改的代码      |
+|   Ctrl+Shift+Space    |       自动补全代码       |
+|       Ctrl+空格       |         代码提示         |
+|    Ctrl+Alt+Space     |     类名或接口名提示     |
+|        Ctrl+P         |       方法参数提示       |
+|   Ctrl+Shift+Alt+N    |   查找类中的方法或变量   |
+|      Alt+Shift+C      |    对比最近修改的代码    |
 
 ## [VsCode 快捷键](./vscode/tool-vscode.md)
 
