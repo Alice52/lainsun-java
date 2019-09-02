@@ -207,7 +207,7 @@ public final class UTCTimeUtil {
 - ZonedTime
 - ZonedDateTime
 
-## Hi
+## hibernate
 
 - 在转换为 entity 时减小 8 小时后再插入
 
@@ -324,7 +324,7 @@ public class UtcTimestampTypeDescriptor extends TimestampTypeDescriptor  {
     }
 }
 
-// use
+// use not work in new version should be tie to getXXX()
 @Column(name = "GamingDay")
 @Type(type = "**.UtcTimestampType")
 @DateTimeFormat(style = "MM")
