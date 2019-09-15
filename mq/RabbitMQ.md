@@ -101,16 +101,40 @@ service rabbitmq-server restart  # 重启
 
 1. routing key
 
-- direct 相当于 p2p 的模式, 非订阅者模式; topic/fanout/header[不常用]是订阅者模式
+- publish 会向所有满足条件的 queue 内都放入相关的 message
+- simple/work mode: no exchange
+  - `publish 时的 ROUTING_KEY 会决定最终这条 message 到哪个 queue. 如果没有 queue 和这个 ROUTING_KEY 做 bind, 则会寻找与 ROUTING_KEY 一样的 queue, 并将消息放入这个 queue`
+  ```java
+  // 这里会 declare queue,
+  channel.queueDeclare(Constants.SIMPLE_QUEUE_NAME, false, false, false, null);
+  // 这里有一个默认的规则: .
+  channel.basicPublish(Constants.EXCHANGE_DIRECT_NAME, Constants.ROUTING_DIRECT_KEY, null, message.getBytes("UTF-8"));
+  ```
+- sub/pub mode: have exchange
+  - direct/topic/fanout/header[不常用]是订阅者模式
+  - 需要先启动消费者, 在启动生产者: 不启动消费者时[dobind], 生产者生成出的消息[只有 routingkey]不知道应该进入哪个 queue[没有 queue 与 exchange 通过 routingkey 绑定]. 启动消费者的时候会做 bind 并第一次声明出 queue, 关闭消费者时 queue 会消失且 bind 也会消失.
+  - **`可以通过 在 sender 端 declare queue 和 dobind, 这样就可以改变为非订阅模式: 消息不会丢失`**
 - queue 声明并不和 `routing key` 关联; 但是 publish 时会指定 `routing key` 和 `exchange`; 最终通过 `dobind` 将 `queue` 和 `exchange` 绑定时指定 `routing key`
 
   ```java
   // queue declare
-  channel.queueDeclare(Constants.QUEUE_NAME, false, false, false, null);
+  Queue.DeclareOk queueDeclare(String queue, boolean durable, boolean exclusive, boolean autoDelete, Map<String, Object> arguments) throws IOException;
+  // channel.queueDeclare(Constants.QUEUE_NAME, false, false, false, null);
 
   // exchange declare
-  channel.exchangeDeclare(Constants.EXCHANGE_NAME, BuiltinExchangeType.TOPIC);
+  Exchange.DeclareOk exchangeDeclare(String exchange, BuiltinExchangeType type) throws IOException;
+  // channel.exchangeDeclare(Constants.EXCHANGE_NAME, BuiltinExchangeType.TOPIC);
 
   // binding
-  channel.queueBind(Constants.QUEUE_NAME, Constants.EXCHANGE_NAME, Constants.ROUTING_KEY);
+  Queue.BindOk queueBind(String queue, String exchange, String routingKey) throws IOException;
+  // channel.queueBind(Constants.QUEUE_NAME, Constants.EXCHANGE_NAME, Constants.ROUTING_KEY);
+
+  // publish
+  // 会向所有满足条件的 queue 都放一份
+  void basicPublish(String exchange, String routingKey, BasicProperties props, byte[] body) throws IOException;
+  // channel.basicPublish(Constants.EXCHANGE_NAME, Constants.ROUTING_KEY, pro, message.getBytes("UTF-8"));
+
+  // consume
+  String basicConsume(String queue, boolean autoAck, DeliverCallback deliverCallback, CancelCallback cancelCallback) throws IOException;
+  // channel.basicConsume(queueName, ack=true, deliverCallback, consumerTag -> { });
   ```
