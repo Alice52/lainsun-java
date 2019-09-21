@@ -320,6 +320,8 @@ git checkout --track [origin/master]
 #### RESET 撤销各个阶段的错误文件
 
 ```shell
+# 放弃工作区的所有修改
+git reset HEAD^
 # 已经 add 的文件移除暂存区, 放弃追踪
 git reset HEAD FILENAME
 # 不指定文件就会全部撤销 add 操作

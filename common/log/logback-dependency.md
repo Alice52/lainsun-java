@@ -1,7 +1,7 @@
 - logback 需要的 dependency
 
 ```xml
-<!--日志jar-->
+<!--LOGGER jar-->
 <dependency>
     <groupId>ch.qos.logback</groupId>
     <artifactId>logback-classic</artifactId>
