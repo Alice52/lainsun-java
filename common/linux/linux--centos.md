@@ -62,51 +62,6 @@ docker update --restart=always 镜像ID
 sudo docker logs -f -t --tail 行数 容器名
 ```
 
-### install mysql
-
-```shell
-docker run -p 3306:3306 --name mysql -v /root/mysql/conf:/etc/mysql/conf.d -v /root/mysql/logs:/logs -v /root/mysql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD='Yu1252068782?' -d mysql:5.7
-```
-
-### install redis
-
-```shell
-docker run -d --name redis -p 6379:6379 -v /root/redis/data:/data -v /root/redis/conf/redis.conf:/usr/local/etc/redis/redis.conf  -v /root/redis/log:/logs redis:5.0 redis-server /usr/local/etc/redis/redis.conf --appendonly yes
-```
-
-### install rabbitmq
-
-```shell
-docker run -d -p 5672:5672 -p 15672:15672 --name rabbitmq 3f92e6354d11
-
-docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 -v /root/rabbitmq/data:/var/lib/rabbitmq -v /root/rabbitmq/logs:/var/log/rabbitmq  --hostname rabbit -e RABBITMQ_DEFAULT_VHOST=/ -e RABBITMQ_DEFAULT_USER=guest -e RABBITMQ_DEFAULT_PASS=guest 3f92e6354d11
-```
-
-### install
-
-dbpath=
-
-#where to log
-logpath=/var/log/mongodb/mongodb.log
-
-```shell
-docker run -d --name mongo -p 27017:27017 -v /root/mongo/data/db:/data/db cdc6740b66a7
-
-docker run -d --name mongodb -p 27017:27017 -v /root/mongodb/configdb:/data/configdb/ -v /root/mongodb/logs:/var/log/mongodb -v /root/mongodb/data/db/:/var/lib/mongodb cdc6740b66a7
-docker exec -it CONTAINER_ID /bin/bash
-
-use admin
-db.createUser({
-    user: "admin",
-    pwd: "Yu1252068782?",
-    roles: [ { role: "root", db: "admin" } ]
-});
-
-# test auth
-
-mongo --port 27017 -u admin -p Yu1252068782? --authenticationDatabase admin
-```
-
 ## remove software
 
 ### romove docker

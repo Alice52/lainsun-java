@@ -13,8 +13,8 @@
   4. 消费者
   5. vrtual hosts: 虚拟主机[数据库]
 - 工作流程
-  ![avatar](./../static/image/mq/RabbitMQModel.png)
-  ![avatar](./../static/image/mq/rabbitmq.png)
+  ![avatar](/static/image/mq/RabbitMQModel.png)
+  ![avatar](/static/image/mq/rabbitmq.png)
 
 ### install on linux os
 
