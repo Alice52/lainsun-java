@@ -220,3 +220,10 @@ worker_cpu_affinity 0001 0010 0100 1000
 #work 绑定 cpu (4 work 绑定 8cpu 中的 4 个) .
 worker_cpu_affinity 0000001 00000010 00000100 00001000
 ```
+
+---
+
+## question
+
+- 1. 403 forbbiden
+  - maybe it shoud be config `autoindex on`.
