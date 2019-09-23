@@ -34,7 +34,7 @@ SHOW GRANTS;
 SHOW WARNINGS/ERRORS;
 
 -- 8. View the database engine
-show engines;
+SHOW engines;
 ```
 
 ## 1. SELECT
@@ -44,7 +44,7 @@ show engines;
 ```sql
 select  DISTINCT Concat(RTrim/LTrim()) *  AS ... -- 连接函数/去空格
 from ...
-join ... on ...
+[left/right/full] join ... on ...
 where ... REGEXP BINARY between ... and ...  and/or xx not in (..., ...)  -- 闭区间 <> 不等于
 having ....
 group by ... asc/desc
@@ -62,43 +62,69 @@ limit LENGTH OFFSET START_POSITION
 
 ### JOIN
 
-#### 等值连接
-#### 非等值连接
-#### 自连接
+#### 等值连接、非等值连接、自连接
+
+```sql
+SELECT COLUMN_NAME, ...
+FROM TABLE_NAME
+INNER|LEFT OUTER|RIGHT OUTER|CROSS JOIN TABLE_NAME ON  CONDITION
+INNER|LEFT OUTER|RIGHT OUTER|CROSS JOIN TABLE_NAME ON  CONDITION
+WHERE ...
+GROUP BY ...
+HAVING ...
+ORDER BY ...
+```
 
 ## 2. UPDATE
+
 ```sql
-UPDATE TABLE_NAME SET COLUMN = VALUE 
+UPDATE TABLE_NAME
+SET COLUMN = VALUE , COLUMN = VALUE
 WHERE ...
 ```
 
 ## 3. INSETR
+
 ```sql
 INSERT INTO TABLE_NAME VALUES (VALUE1, VALUE2,....)
 INSERT INTO TABLE_NAME (COLUMN1, COLUMN1,...) VALUES (VALUE1, VALUE2,....)
 ```
 
 ## 4. DELETE
+
 ```sql
 DELETE FROM TABLE_NAME WHERE ...
--- truncate 删除带自增长的列的表后，如果再插入数据，数据从1开始
-truncate table 表名
+-- truncate 删除带自增长的列的表后, 如果再插入数据, 数据从 1 开始
+TRUNCATE table TABLE_NAME
+
+DELETE ALIAS, ALIAS
+FROM TABLE_NAME ALIAS, TABLE_NAME ALIAS
+WHERE ...
 ```
 
+## 5. DATABASE
 
+```sql
+-- create database
+CREATE DATABASE DATABASE_NAME
+-- drop database
+DROP DATABASE DATABASE_NAME
+```
 
+## 6. TABLE
 
+```sql
+-- create table
+CREATE　TABLE IF NOT EXISTS TABLE_NAME(
+  id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT `primary key`,
+  gmt_create datetime NOT NULL COMMENT `create time`,
+  user_name NVARCHAR(256) NOT NULL COMMENT `user name`,
+  user_value VARCHAR(256) NOT NULL COMMENT `user value`,
+  gender TINYINT(1) DEFAULT true COMMENT `user gender default 1`,
+  is_deleted TINYINT(1) DEFAULT false COMMENT `user gender default false`,
+)
 
-
-
-
-
-
-
-
-
-
-
+```
 
 ## 函数
 
