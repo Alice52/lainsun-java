@@ -106,16 +106,12 @@
 
     ```shell
     sudo docker pull tomcat:8.5.40
-    mkdir tomcat # /usr/local/
-    docker run -d -p 8001:8080 --name tomcat -v /tomcat:/usr/local/tomcat/webapps tomcat
-    # -d  后台运行tomcat
-    # -p 8001:8080  将容器的8080端口映射到主机的8001端口
-    # --name tomcat 容器的名字
-    # -v /tomcat:/usr/local/tomcat/webapps 将主机中当前目录/tomcat 挂载到容器的/webapps
+    mkdir tomcat # /root
+    docker run -d -p 8001:8080 --name tomcat8 -v /root/tomcat/conf/:/usr/local/tomcat/conf -v /root/tomcat/logs:/usr/local/tomcat/logs -v /root/tomcat/webapps/:/usr/local/tomcat/webapps tomcat
 
-    sudo docker exec -it tomcat /bin/bash
+    sudo docker exec -it tomcat8 /bin/bash
     # look up log
-    docker logs --tail=200 -f tomcat
+    docker logs --tail=200 -f tomcat8
     ```
 
 ### mssql-server
