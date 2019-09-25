@@ -39,127 +39,59 @@
 
 ### **annotation**
 
+- illustration
+  1. `* + ?` 默认为贪婪模式
+
+|    model    |        description         |
+| :---------: | :------------------------: |
+|      ^      |      匹配字符串的开头      |
+|     \$      |      匹配字符串的结尾      |
+|      .      |      除换行符任意字符      |
+|     \*      |          0/1 匹配          |
+|      +      |          1/n 匹配          |
+|      ?      |          0/1 匹配          |
+| \*?, +?, ?? |         非贪婪模式         |
+|  {n [,m]}   |        匹配 n-m 次         |
+|   {n,m}?    |   非贪婪模式[匹配 n 次]    |
+|    [...]    |      匹配[]内任意字符      |
+|    [a-z]    |     匹配 a-z 任意字符      |
+|   [^...]    |     匹配非[]内任意字符     |
+|    `x|y`    |        匹配 x 或 y         |
+|    (...)    |  指定子组的开始和结束位置  |
+|     \       |           反转义           |
+|     \b      | 匹配边界[字与空格间的位置] |
+|     \B      |          非 `\b`           |
+|     \d      |       数字匹配[0-9]        |
+|     \D      |          非 `\d`           |
+|     \f      |         匹配换页符         |
+|     \n      |         匹配换行符         |
+|    \num     |      匹配 num[正整数]      |
+|     \r      |         匹配回车符         |
+|     \t      |       匹配水平制表符       |
+|     \v      |       匹配垂直制表符       |
+|     \s      |      匹配任何空白字符      |
+|     \S      |          非 `\s`           |
+|     \w      |      匹配任何字类字符      |
+|     \W      |          非 `\w`           |
+
+- sapmle
+  ```txt
+  1. "er\b"匹配"never"中的"er", 但不匹配"verb"中的"er"
+  2. "(...)\1"匹配两个连续的相同字符
+  3. [ \f\n\r\t\v] 等价于 \s
+  4. [A-Za-z0-9_] 等价于 \w
+  ```
+
 <table>
-    <tr align='center'>
-        <th>model</th><th>description</th>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>^</td>
-        <td>匹配字符串的开头</td>
-    </tr>
-    <tr bgcolor = '#FFFAFA' align='center'>
-        <td>$</td>
-        <td>匹配字符串的开头</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>.</td>
-        <td>匹配任意字符, 除了换行符</td>
-    </tr>
-    <tr bgcolor = '#FFFAFA' align='center'>
-        <td>*</td>
-        <td>贪婪模式 <strong>零次或多次</strong>匹配前面的字符或子表达式</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>+</td>
-        <td>贪婪模式 <strong>一次或多次</strong>匹配前面的字符或子表达式</td>
-    </tr>
-    <tr bgcolor = '#FFFAFA' align='center'>
-        <td>?</td>
-        <td>贪婪模式 <strong>零次或一次</strong>匹配前面的字符或子表达式</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>*?, +?, ??</td>
-        <td>非贪婪模式 匹配前面的字符或子表达式</td>
-    </tr>
-    <tr bgcolor = '#FFFAFA' align='center'>
-        <td>{n [,m]}</td>
-        <td>匹配至少 n 次, 至多 m 次</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>{n,m}?</td>
-        <td>同上, 启用非贪婪模式, 即只匹配 n 次</td>
-    </tr>
-    <tr bgcolor = '#FFFAFA' align='center'>
-        <td>[...]</td>
-        <td>匹配所包含的任意一个字符</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>[a-z]</td>
-        <td>匹配所a-z的任意一个字符</td>
-    </tr>
-    <tr bgcolor = '#FFFAFA' align='center'>
-        <td>[^...]</td>
-        <td>反向匹配所包含的任意一个字符</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>x|y</td>
-        <td>匹配 x 或 y</td>
-    </tr>
     <tr bgcolor = '#FFFAFA' align='center'>
         <td>(...)</td>
         <td>匹配圆括号中的正则表达式, 或者指定一个子组的开始和结束位置.<br>
         注: <strong>子组的内容可以在匹配之后被 \数字 再次引用</strong><br>
         举个栗子： (\w+) \1 可以字符串 "FishC FishC.com" 中的 "FishC FishC"（注意有空格）</td>
     </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>\</td>
-        <td>下边列举了由字符 '\' 和另一个字符组成的特殊含义。注意, '\' + 元字符的组合可以解除元字符的特殊功能</td>
-    </tr>
-    <tr bgcolor = '#FFFAFA' align='center'>
-        <td>\b</td>
-        <td>匹配一个字边界, 即字与空格间的位置。例如, "er\b"匹配"never"中的"er", 但不匹配"verb"中的"er"</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>\B</td>
-        <td>非字边界匹配。"er\B"匹配"verb"中的"er", 但不匹配"never"中的"er"</td>
-    </tr>
-    <tr bgcolor = '#FFFAFA' align='center'>
-        <td>\d</td>
-        <td>数字字符匹配: 等效于 [0-9]</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>\D</td>
-        <td>非数字字符匹配: 等效于 [^0-9]</td>
-    </tr>
-    <tr bgcolor = '#FFFAFA' align='center'>
-        <td>\f</td>
-        <td>换页符匹配</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>\n</td>
-        <td>换行符匹配</td>
-    </tr>
     <tr bgcolor = '#FFFAFA' align='center'>
         <td>\num</td>
         <td>匹配 num, 此处的 num 是一个正整数。到捕获匹配的反向<strong>引用</strong>.例如, "(...)\1"匹配两个连续的相同字符。</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>\r</td>
-        <td>匹配一个回车符</td>
-    </tr>
-    <tr bgcolor = '#FFFAFA' align='center'>
-        <td>\t</td>
-        <td>水平制表符匹配</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>\v</td>
-        <td>垂直制表符匹配</td>
-    </tr>
-    <tr bgcolor = '#FFFAFA' align='center'>
-        <td>\s</td>
-        <td>匹配任何空白字符, 包括空格、制表符、换页符等: 与 [ \f\n\r\t\v] 等效</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>\S</td>
-        <td>匹配任何非空白字符: 与 [^ \f\n\r\t\v] 等效</td>
-    </tr>
-    <tr bgcolor = '#FFFAFA' align='center'>
-        <td>\w</td>
-        <td>匹配任何字类字符, 包括下划线: 与"[A-Za-z0-9_]"等效</td>
-    </tr>
-    <tr bgcolor = '#FFF0F5' align='center'>
-        <td>\W</td>
-        <td>与任何非单词字符匹配: 与"[^A-Za-z0-9_]"等效</td>
     </tr>
     <tr bgcolor = '#FFFAFA' align='center'>
         <td>(?:...)</td>
