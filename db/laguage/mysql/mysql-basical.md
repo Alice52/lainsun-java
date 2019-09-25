@@ -114,17 +114,126 @@ DROP DATABASE DATABASE_NAME
 ## 6. TABLE
 
 ```sql
--- create table
-CREATE　TABLE IF NOT EXISTS TABLE_NAME(
-  id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT `primary key`,
-  gmt_create datetime NOT NULL COMMENT `create time`,
-  user_name NVARCHAR(256) NOT NULL COMMENT `user name`,
-  user_value VARCHAR(256) NOT NULL COMMENT `user value`,
-  gender TINYINT(1) DEFAULT true COMMENT `user gender default 1`,
-  is_deleted TINYINT(1) DEFAULT false COMMENT `user gender default false`,
-)
+-- 1. create table
+CREATE TABLE IF NOT EXISTS test_create(
+  id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'primary key',
+  gmt_create DATETIME NOT NULL COMMENT 'create time',
+  user_name NVARCHAR(256) NOT NULL COMMENT 'user name',
+  user_value VARCHAR(256) NOT NULL COMMENT 'user value',
+  gender TINYINT(1) DEFAULT true COMMENT 'user gender default 1',
+  transaction_id VARCHAR(36) NOT NULL COMMENT 'transaction id',
+  descripttion BLOB NOT NULL COMMENT 'decription about user',
+  is_deleted TINYINT(1) DEFAULT false COMMENT 'user gender default false',
+  create_time DATETIME NOT NULL comment 'create time',
+  jpaentity_id INT comment 'foregin key',
+  PRIMARY KEY (id),
+  INDEX (create_time, user_name),
+  UNIQUE KEY uk_name_value (user_name, user_value), -- can be null
+  KEY transaction_id (transaction_id),
+  FOREIGN KEY (jpaentity_id) REFERENCES JPAEntity(id)
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8 AUTO_INCREMENT=1;
 
+-- 2. get table info
+DESC TABLE_NAME;
+
+-- 3. alter table
+ALTER TABLE TBALENAME ADD|MODIFY|DROP|CHANGE COLUMN COLUMNNAME DATETYPE;
+-- 3.1. alter column
+ALTER TABLE TBALENAME CHANGE COLUMN sex gender CHAR;
+-- 3.2 alter table name
+ALTER TABLE TBALENAME RENAME [TO] NEW_TBALENAME;
+-- 3.3 alter column type and row constraint
+ALTER TABLE TBALENAME MODIFY COLUMN COLMUNNAME DATE ;
+-- 3.4 add column
+ALTER TABLE TBALENAME ADD COLUMN NEW_COLUMNNAME VARCHAR(20) FIRST;
+-- 3.5 minus column
+ALTER TABLE TBALENAME DROP COLUMN COLMUNNAME;
+
+-- 4. delete table
+DROP TABLE [IF EXISTS] TBALENAME;
 ```
+
+## 7. TRANSACTION
+
+- 1. definition:
+  通过一组逻辑操作单元(一组 DML-sql 语句), 将数据从一种状态切换到另外一种状态
+- 2. feature: ACID
+
+  1. 原子性: 要么都执行, 要么都回滚 2. 一致性: 保证数据的状态操作前和操作后保持一致 3. 隔离性: 多个事务同时操作相同数据库的同一个数据时, 一个事务的执行不受另外一个事务的干扰 4. 持久性: 一个事务一旦提交, 则数据将持久化到本地, 除非其他事务对其进行修改
+
+- 3. coding step
+
+  1. start transaction[disable auto commit]
+  2. coding transaction unit[sql]
+  3. commit transaction or rollback:
+
+  ```sql
+  SET autocommit=0;
+  START TRANSACTION;
+  COMMIT [to BREAKPOINT];
+  ROLLBACK [to BREAKPOINT];
+  ```
+
+- 4. category
+  1. Implicit transactions: with no obvious sign of starting and ending the transaction[insert/update/delete]
+  2. Explicit transaction: with an obvious sign of starting and ending the transaction
+
+- 5. transaction isolation level
+  1. 脏读: 一个事务读取到了另外一个事务未提交的数据.
+  2. 不可重复读: 同一个事务中, 多次读取到的数据不一致.
+  3. 幻读: 一个事务读取数据时, 另外一个事务进行更新, 导致第一个事务读取到了没有更新的数据.
+
+- 6. avoid transaction concurrency
+  - set transaction isolation level 
+  ```sql
+	READ UNCOMMITTED
+	READ COMMITTED  -- 可以避免脏读
+	REPEATABLE READ -- 可以避免脏读、不可重复读和一部分幻读
+	SERIALIZABLE -- 可以避免脏读、不可重复读和幻读
+	```
+	- set isolation level:
+  ```sql
+	-- 设置隔离级别：
+  SET SESSION|GLOBAL TRANSACTION ISOLATION LEVEL 隔离级别名;
+	-- 查看隔离级别：
+	SELECT @@tx_isolation;
+  ```
+
+## 8. view
+
+- 8.1 definition: a virtual table
+- 8.2 diffence 
+  |--|使用方式| 占用物理空间|
+  |:--:|:--:|:--:|
+  |视图|完全相同|不占用，仅仅保存的是sql逻辑|
+  |表|完全相同|占用|
+- 8.3 feature
+  1. sql语句提高重用性, 效率高
+  2. 和表实现了分离, 提高了安全性
+
+- 8.4 syntax
+```sql
+-- 1. create view
+CREATE VIEW  VIEWNAME AS 
+SELECT * FROM ...
+-- 2. select: as table
+
+-- 3. update view
+CREATE OR REPLACE VIEW VIEWNAME AS SELECT ... FROM ... WHERE ...;
+ALTER VIEW VIEWNAME AS SELECT ... FROM ...;
+
+-- 4. delete view
+DROP VIEW VIEWNAME, VIEWNAME2, VIEWNAME3;
+
+-- 5. description view
+DESC VIEWNAME;
+SHOW CREATE VIEW VIEWNAME;
+```
+
+- 8.5 note
+ 1. 包含以下关键字的VIEW不能更新: 分组函数, DISTINCT, GROUP BY, HAVING,  UNION [ALL], 常量视图, **`SELECT 中包含子查询 JOIN ... FROM 一个不能更新的视图 WHERE 子句的子查询引用了 FROM 子句中的表`**
+
+## 9. SP
 
 ## 函数
 
