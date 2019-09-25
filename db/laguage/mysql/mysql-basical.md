@@ -169,9 +169,9 @@ DROP TABLE [IF EXISTS] TBALENAME;
   - 持久性: 一个事务一旦提交, 则数据将持久化到本地, 除非其他事务对其进行修改
 
 - 7.3 coding step
-  1. start transaction[disable auto commit]
-  2. coding transaction unit[sql]
-  3. commit transaction or rollback:
+  - start transaction[disable auto commit]
+  - coding transaction unit[sql]
+  - commit transaction or rollback:
   ```sql
   SET autocommit=0;
   START TRANSACTION;
@@ -180,13 +180,13 @@ DROP TABLE [IF EXISTS] TBALENAME;
   ```
 
 - 7.4 category
-  1. Implicit transactions: with no obvious sign of starting and ending the transaction[insert/update/delete]
-  2. Explicit transaction: with an obvious sign of starting and ending the transaction
+  - Implicit transactions: with no obvious sign of starting and ending the transaction[insert/update/delete]
+  - Explicit transaction: with an obvious sign of starting and ending the transaction
 
 - 7.5 transaction isolation level
-  1. 脏读: 一个事务读取到了另外一个事务未提交的数据.
-  2. 不可重复读: 同一个事务中, 多次读取到的数据不一致.
-  3. 幻读: 一个事务读取数据时, 另外一个事务进行更新, 导致第一个事务读取到了没有更新的数据.
+  - 脏读: 一个事务读取到了另外一个事务未提交的数据.
+  - 不可重复读: 同一个事务中, 多次读取到的数据不一致.
+  - 幻读: 一个事务读取数据时, 另外一个事务进行更新, 导致第一个事务读取到了没有更新的数据.
 
 - 7.6 avoid transaction concurrency
   - set transaction isolation level 
@@ -213,8 +213,8 @@ DROP TABLE [IF EXISTS] TBALENAME;
   |视图|完全相同|不占用，仅仅保存的是sql逻辑|
   |表|完全相同|占用|
 - 8.3 feature
-  1. sql语句提高重用性, 效率高
-  2. 和表实现了分离, 提高了安全性
+  - sql语句提高重用性, 效率高
+  - 和表实现了分离, 提高了安全性
 
 - 8.4 syntax
 ```sql
@@ -226,10 +226,8 @@ SELECT * FROM ...
 -- 3. update view
 CREATE OR REPLACE VIEW VIEWNAME AS SELECT ... FROM ... WHERE ...;
 ALTER VIEW VIEWNAME AS SELECT ... FROM ...;
-
 -- 4. delete view
 DROP VIEW VIEWNAME, VIEWNAME2, VIEWNAME3;
-
 -- 5. description view
 DESC VIEWNAME;
 SHOW CREATE VIEW VIEWNAME;
@@ -244,7 +242,7 @@ SHOW CREATE VIEW VIEWNAME;
 
 ## 函数
 
-- 1. 字符
+1. 字符
 
   ```sql
   Concat()  -- 连接 select
@@ -261,7 +259,7 @@ SHOW CREATE VIEW VIEWNAME;
   Upper() -- 将串转换为大写
   ```
 
-- 2. 时间
+2. 时间
 
   ```sql
   Now()
@@ -285,21 +283,21 @@ SHOW CREATE VIEW VIEWNAME;
   Year() -- 返回一个日期的年份部分
   ```
 
-- 时间 FORMAT
+  - 时间 FORMAT
 
-  | 格式符 |    功能    |
-  | :----: | :--------: |
-  |   %Y   | 四位的年份 |
-  |   %y   | 两位的年份 |
-  |   %m   |   0 始月   |
-  |   %c   |   1 始月   |
-  |   %d   |   1 始日   |
-  |   %H   |  24 制时   |
-  |   %h   |  12 制时   |
-  |   %i   |     分     |
-  |   %s   |     秒     |
+    | 格式符 |    功能    |
+    | :----: | :--------: |
+    |   %Y   | 四位的年份 |
+    |   %y   | 两位的年份 |
+    |   %m   |   0 始月   |
+    |   %c   |   1 始月   |
+    |   %d   |   1 始日   |
+    |   %H   |  24 制时   |
+    |   %h   |  12 制时   |
+    |   %i   |     分     |
+    |   %s   |     秒     |
 
-- 3. 数学函数
+3. 数学函数
 
   ```sql
   round  -- 四舍五入
@@ -310,7 +308,7 @@ SHOW CREATE VIEW VIEWNAME;
   truncate -- 截断
   ```
 
-- 4. 流程控制函数
+4. 流程控制函数
 
   ```sql
   if 处理双分支
@@ -319,7 +317,7 @@ SHOW CREATE VIEW VIEWNAME;
       情况2：处理条件判断
   ```
 
-- 5. 其他函数
+5. 其他函数
   ```sql
   version版本
   database当前库
@@ -328,9 +326,9 @@ SHOW CREATE VIEW VIEWNAME;
 
 ---
 
-## Introduce
+## NOTICE
 
-1. NULL 无值(no value), 它与字段包含 0、空字符串或仅仅包含空格不同
+1. NULL 无值(no value), 它与字段包含 0, 空字符串或仅仅包含空格不同
 2. WHERE 后的 AND 优先级高于 OR.
 
 ---
