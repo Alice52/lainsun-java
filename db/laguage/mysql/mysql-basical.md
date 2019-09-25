@@ -12,28 +12,20 @@
 ```sql
 -- 0. 帮助指令
 HELP SHOW;
-
 -- 1. change database
 USE DATABASE_NAME;
-
 -- 2. 查询所有数据名称
 SHOW databases;
-
 -- 3. 查看一个数据库内的所有表
 SHOW TABLES;
-
 -- 4. 查看一张表的所有字段
 SHOW COLUMNS FROM TABLE_NAME; -- DESCRIBE TABLE_NAME;
-
 -- 5. 查看建库/表 SQL
 SHOW CREATE DATABASE/TBALE DATABASE_NAME/TABLE_NAME;
-
 -- 6. 查看授权用户
 SHOW GRANTS;
-
 -- 7. 查看数据库服务器的错误
 SHOW WARNINGS/ERRORS;
-
 -- 8. View the database engine
 SHOW ENGINES;
 ```
@@ -57,10 +49,12 @@ LIMIT LENGTH OFFSET START_POSITION
 ### wildcard
 
 1. LIKE 操作符: 区分大小写
-  ```txt
-  1.1 `%:` 表示任何字符出现任意次数
-  1.2 `_:` 表示只匹配单个字符
-  ```
+
+```txt
+1.1 `%:` 表示任何字符出现任意次数
+1.2 `_:` 表示只匹配单个字符
+```
+
 2. `WHERE ... BINARY REGEXP`
 
 ### JOIN
@@ -163,15 +157,18 @@ DROP TABLE [IF EXISTS] TBALENAME;
   通过一组逻辑操作单元(一组 DML-sql 语句), 将数据从一种状态切换到另外一种状态
   ```
 - 7.2 feature: ACID
-  - 原子性: 要么都执行, 要么都回滚 
-  - 一致性: 保证数据的状态操作前和操作后保持一致 
-  - 隔离性: 多个事务同时操作相同数据库的同一个数据时, 一个事务的执行不受另外一个事务的干扰 
+
+  - 原子性: 要么都执行, 要么都回滚
+  - 一致性: 保证数据的状态操作前和操作后保持一致
+  - 隔离性: 多个事务同时操作相同数据库的同一个数据时, 一个事务的执行不受另外一个事务的干扰
   - 持久性: 一个事务一旦提交, 则数据将持久化到本地, 除非其他事务对其进行修改
 
 - 7.3 coding step
+
   - start transaction[disable auto commit]
   - coding transaction unit[sql]
   - commit transaction or rollback:
+
   ```sql
   SET autocommit=0;
   START TRANSACTION;
@@ -180,49 +177,55 @@ DROP TABLE [IF EXISTS] TBALENAME;
   ```
 
 - 7.4 category
+
   - Implicit transactions: with no obvious sign of starting and ending the transaction[insert/update/delete]
   - Explicit transaction: with an obvious sign of starting and ending the transaction
 
 - 7.5 transaction isolation level
+
   - 脏读: 一个事务读取到了另外一个事务未提交的数据.
   - 不可重复读: 同一个事务中, 多次读取到的数据不一致.
   - 幻读: 一个事务读取数据时, 另外一个事务进行更新, 导致第一个事务读取到了没有更新的数据.
 
 - 7.6 avoid transaction concurrency
-  - set transaction isolation level 
+  - set transaction isolation level
   ```sql
-	READ UNCOMMITTED
-	READ COMMITTED  -- 可以避免脏读
-	REPEATABLE READ -- 可以避免脏读、不可重复读和一部分幻读
-	SERIALIZABLE -- 可以避免脏读、不可重复读和幻读
-	```
-	- set isolation level:
+  READ UNCOMMITTED
+  READ COMMITTED  -- 可以避免脏读
+  REPEATABLE READ -- 可以避免脏读、不可重复读和一部分幻读
+  SERIALIZABLE -- 可以避免脏读、不可重复读和幻读
+  ```
+  - set isolation level:
   ```sql
-	-- 设置隔离级别：
+  -- 设置隔离级别：
   SET SESSION|GLOBAL TRANSACTION ISOLATION LEVEL 隔离级别名;
-	-- 查看隔离级别：
-	SELECT @@tx_isolation;
+  -- 查看隔离级别:
+  SELECT @@tx_isolation;
   ```
 
 ## 8. view
 
 - 8.1 definition: a virtual table
-- 8.2 diffence 
-  |  |使用方式| 占用物理空间|
-  |:--:|:--:|:--:|
-  |视图|完全相同|不占用，仅仅保存的是sql逻辑|
-  |表|完全相同|占用|
+
+- 8.2 diffence
+
+  |      | 使用方式 |         占用物理空间          |
+  | :--: | :------: | :---------------------------: |
+  | 视图 | 完全相同 | 不占用，仅仅保存的是 sql 逻辑 |
+  |  表  | 完全相同 |             占用              |
+
 - 8.3 feature
-  - sql语句提高重用性, 效率高
+
+  - SQL 语句提高重用性, 效率高
   - 和表实现了分离, 提高了安全性
 
 - 8.4 syntax
+
 ```sql
 -- 1. create view
-CREATE VIEW  VIEWNAME AS 
+CREATE VIEW  VIEWNAME AS
 SELECT * FROM ...
 -- 2. select: as table
-
 -- 3. update view
 CREATE OR REPLACE VIEW VIEWNAME AS SELECT ... FROM ... WHERE ...;
 ALTER VIEW VIEWNAME AS SELECT ... FROM ...;
@@ -234,7 +237,8 @@ SHOW CREATE VIEW VIEWNAME;
 ```
 
 - 8.5 note
- 1. 包含以下关键字的VIEW不能更新: 分组函数, DISTINCT, GROUP BY, HAVING,  UNION [ALL], 常量视图, **`SELECT 中包含子查询 JOIN ... FROM 一个不能更新的视图 WHERE 子句的子查询引用了 FROM 子句中的表`**
+
+1.  包含以下关键字的 VIEW 不能更新: 分组函数, DISTINCT, GROUP BY, HAVING, UNION [ALL], 常量视图, **`SELECT 中包含子查询 JOIN ... FROM 一个不能更新的视图 WHERE 子句的子查询引用了 FROM 子句中的表`**
 
 ## 9. SP
 
@@ -244,85 +248,86 @@ SHOW CREATE VIEW VIEWNAME;
 
 1. 字符
 
-  ```sql
-  Concat()  -- 连接 select
-  Left() -- 返回串左边的字符
-  Length()  -- 返回串的长度
-  Locate() -- 找出串的一个子串
-  Lower() -- 将串转换为小写
-  Trim()
-  LTrim() -- 去掉串左边的空格
-  RTrim() -- 去掉串右边的空格
-  Right() -- 返回串右边的字符
-  Soundex() -- 返回串的SOUNDEX值
-  SubString() -- 返回子串的字符
-  Upper() -- 将串转换为大写
-  ```
+```sql
+Concat()  -- 连接 select
+Left() -- 返回串左边的字符
+Length()  -- 返回串的长度
+Locate() -- 找出串的一个子串
+Lower() -- 将串转换为小写
+Trim()
+LTrim() -- 去掉串左边的空格
+RTrim() -- 去掉串右边的空格
+Right() -- 返回串右边的字符
+Soundex() -- 返回串的SOUNDEX值
+SubString() -- 返回子串的字符
+Upper() -- 将串转换为大写
+```
 
 2. 时间
 
-  ```sql
-  Now()
-  AddDate() -- 增加一个日期（天、周等）
-  AddTime() -- 增加一个时间（时、分等）
-  CurDate() -- 返回当前日期
-  CurTime() -- 返回当前时间
-  Date() -- 返回日期时间的日期部分
-  DateDiff() -- 计算两个日期之差
-  Date_Add() -- 高度灵活的日期运算函数
-  str_to_date()
-  Date_Format() -- 返回一个格式化的日期或时间串
-  Day() -- 返回一个日期的天数部分
-  DayOfWeek() -- 对于一个日期，返回对应的星期几
-  Hour() -- 返回一个时间的小时部分
-  Minute() -- 返回一个时间的分钟部分
-  Month() -- 返回一个日期的月份部分
-  Now() -- 返回当前日期和时间
-  Second() -- 返回一个时间的秒部分
-  Time() -- 返回一个日期时间的时间部分
-  Year() -- 返回一个日期的年份部分
-  ```
+```sql
+Now()
+AddDate() -- 增加一个日期（天、周等）
+AddTime() -- 增加一个时间（时、分等）
+CurDate() -- 返回当前日期
+CurTime() -- 返回当前时间
+Date() -- 返回日期时间的日期部分
+DateDiff() -- 计算两个日期之差
+Date_Add() -- 高度灵活的日期运算函数
+str_to_date()
+Date_Format() -- 返回一个格式化的日期或时间串
+Day() -- 返回一个日期的天数部分
+DayOfWeek() -- 对于一个日期，返回对应的星期几
+Hour() -- 返回一个时间的小时部分
+Minute() -- 返回一个时间的分钟部分
+Month() -- 返回一个日期的月份部分
+Now() -- 返回当前日期和时间
+Second() -- 返回一个时间的秒部分
+Time() -- 返回一个日期时间的时间部分
+Year() -- 返回一个日期的年份部分
+```
 
-  - 时间 FORMAT
+- 时间 FORMAT
 
-    | 格式符 |    功能    |
-    | :----: | :--------: |
-    |   %Y   | 四位的年份 |
-    |   %y   | 两位的年份 |
-    |   %m   |   0 始月   |
-    |   %c   |   1 始月   |
-    |   %d   |   1 始日   |
-    |   %H   |  24 制时   |
-    |   %h   |  12 制时   |
-    |   %i   |     分     |
-    |   %s   |     秒     |
+  | 格式符 |    功能    |
+  | :----: | :--------: |
+  |   %Y   | 四位的年份 |
+  |   %y   | 两位的年份 |
+  |   %m   |   0 始月   |
+  |   %c   |   1 始月   |
+  |   %d   |   1 始日   |
+  |   %H   |  24 制时   |
+  |   %h   |  12 制时   |
+  |   %i   |     分     |
+  |   %s   |     秒     |
 
 3. 数学函数
 
-  ```sql
-  round  -- 四舍五入
-  rand -- 随机数
-  floor -- 向下取整
-  ceil -- 向上取整
-  mod -- 取余
-  truncate -- 截断
-  ```
+```sql
+round  -- 四舍五入
+rand -- 随机数
+floor -- 向下取整
+ceil -- 向上取整
+mod -- 取余
+truncate -- 截断
+```
 
 4. 流程控制函数
 
-  ```sql
-  if 处理双分支
-  case语句 处理多分支
-      情况1：处理等值判断
-      情况2：处理条件判断
-  ```
+```sql
+if 处理双分支
+case语句 处理多分支
+    情况1：处理等值判断
+    情况2：处理条件判断
+```
 
 5. 其他函数
-  ```sql
-  version版本
-  database当前库
-  user当前连接用户
-  ```
+
+```sql
+version版本
+database当前库
+user当前连接用户
+```
 
 ---
 
