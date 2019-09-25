@@ -3,8 +3,9 @@
 1. 数据库[database]: 数据库是一个以某种有组织的方式存储的数据集合.
 2. [DBMS]: 数据库管理系统
 3. 模式[schema]: 关于数据库和表的布局及特性的信息.
-4. 主键[primarykey]:一列(或一组列), 其值能够唯一区分表中每个行.[不同且非空]
+4. 主键[primarykey]:一列(或一组列), 其值能够唯一区分表中每个行[不同且非空].
 5. SQL: 结构化查询语言.
+6. SP: 存储过程
 
 ## 二、 基础指令
 
@@ -13,16 +14,16 @@
 HELP SHOW;
 
 -- 1. change database
-use DATABASE_NAME;
+USE DATABASE_NAME;
 
 -- 2. 查询所有数据名称
-show databases;
+SHOW databases;
 
 -- 3. 查看一个数据库内的所有表
 SHOW TABLES;
 
 -- 4. 查看一张表的所有字段
-SHOW COLUMNS from TABLE_NAME; -- DESCRIBE TABLE_NAME;
+SHOW COLUMNS FROM TABLE_NAME; -- DESCRIBE TABLE_NAME;
 
 -- 5. 查看建库/表 SQL
 SHOW CREATE DATABASE/TBALE DATABASE_NAME/TABLE_NAME;
@@ -34,31 +35,33 @@ SHOW GRANTS;
 SHOW WARNINGS/ERRORS;
 
 -- 8. View the database engine
-SHOW engines;
+SHOW ENGINES;
 ```
 
 ## 1. SELECT
 
-### 语法
+### syntax
 
 ```sql
-select  DISTINCT Concat(RTrim/LTrim()) *  AS ... -- 连接函数/去空格
-from ...
-[left/right/full] join ... on ...
-where ... REGEXP BINARY between ... and ...  and/or xx not in (..., ...)  -- 闭区间 <> 不等于
-having ....
-group by ... asc/desc
-order by ..
-limit START_POSITION, LENGTH
-limit LENGTH OFFSET START_POSITION
+SELECT DISTINCT CONCAT(RTRIM/LTRIM()) *  AS ... -- 连接函数/去空格
+FROM ...
+[LEFT/RIGHT/FULL] JOIN ... ON ...
+WHERE ... REGEXP BINARY BETWEEN ... AND ...  AND/OR xx NOT IN (..., ...)  -- 闭区间 <> 不等于
+HAVING ....
+GROUP BY ... ASC/DESC
+ORDER BY ..
+LIMIT START_POSITION, LENGTH
+LIMIT LENGTH OFFSET START_POSITION
 ```
 
-### 通配符
+### wildcard
 
 1. LIKE 操作符: 区分大小写
-   1.1 `%:` 表示任何字符出现任意次数
-   1.2 `_:` 表示只匹配单个字符
-2. `where ... BINARY REGEXP`
+  ```txt
+  1.1 `%:` 表示任何字符出现任意次数
+  1.2 `_:` 表示只匹配单个字符
+  ```
+2. `WHERE ... BINARY REGEXP`
 
 ### JOIN
 
@@ -155,18 +158,20 @@ DROP TABLE [IF EXISTS] TBALENAME;
 
 ## 7. TRANSACTION
 
-- 1. definition:
+- 7.1 definition:
+  ```txt
   通过一组逻辑操作单元(一组 DML-sql 语句), 将数据从一种状态切换到另外一种状态
-- 2. feature: ACID
+  ```
+- 7.2 feature: ACID
+  - 原子性: 要么都执行, 要么都回滚 
+  - 一致性: 保证数据的状态操作前和操作后保持一致 
+  - 隔离性: 多个事务同时操作相同数据库的同一个数据时, 一个事务的执行不受另外一个事务的干扰 
+  - 持久性: 一个事务一旦提交, 则数据将持久化到本地, 除非其他事务对其进行修改
 
-  1. 原子性: 要么都执行, 要么都回滚 2. 一致性: 保证数据的状态操作前和操作后保持一致 3. 隔离性: 多个事务同时操作相同数据库的同一个数据时, 一个事务的执行不受另外一个事务的干扰 4. 持久性: 一个事务一旦提交, 则数据将持久化到本地, 除非其他事务对其进行修改
-
-- 3. coding step
-
+- 7.3 coding step
   1. start transaction[disable auto commit]
   2. coding transaction unit[sql]
   3. commit transaction or rollback:
-
   ```sql
   SET autocommit=0;
   START TRANSACTION;
@@ -174,16 +179,16 @@ DROP TABLE [IF EXISTS] TBALENAME;
   ROLLBACK [to BREAKPOINT];
   ```
 
-- 4. category
+- 7.4 category
   1. Implicit transactions: with no obvious sign of starting and ending the transaction[insert/update/delete]
   2. Explicit transaction: with an obvious sign of starting and ending the transaction
 
-- 5. transaction isolation level
+- 7.5 transaction isolation level
   1. 脏读: 一个事务读取到了另外一个事务未提交的数据.
   2. 不可重复读: 同一个事务中, 多次读取到的数据不一致.
   3. 幻读: 一个事务读取数据时, 另外一个事务进行更新, 导致第一个事务读取到了没有更新的数据.
 
-- 6. avoid transaction concurrency
+- 7.6 avoid transaction concurrency
   - set transaction isolation level 
   ```sql
 	READ UNCOMMITTED
@@ -203,7 +208,7 @@ DROP TABLE [IF EXISTS] TBALENAME;
 
 - 8.1 definition: a virtual table
 - 8.2 diffence 
-  |--|使用方式| 占用物理空间|
+  |  |使用方式| 占用物理空间|
   |:--:|:--:|:--:|
   |视图|完全相同|不占用，仅仅保存的是sql逻辑|
   |表|完全相同|占用|
@@ -234,6 +239,8 @@ SHOW CREATE VIEW VIEWNAME;
  1. 包含以下关键字的VIEW不能更新: 分组函数, DISTINCT, GROUP BY, HAVING,  UNION [ALL], 常量视图, **`SELECT 中包含子查询 JOIN ... FROM 一个不能更新的视图 WHERE 子句的子查询引用了 FROM 子句中的表`**
 
 ## 9. SP
+
+---
 
 ## 函数
 
