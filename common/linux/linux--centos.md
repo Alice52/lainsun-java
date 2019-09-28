@@ -97,6 +97,36 @@ rm -rf /var/lib/docker
 
 ---
 
+## python
+
+### python version
+
+```shell
+# 1. install python3 dependency: maybe not requried
+yum -y install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
+# 2. download python3
+mkdir /usr/local/python3
+wget https://www.python.org/ftp/python/3.6.8/Python-3.6.8.tar.xz
+tar -xvf Python-3.6.8.tar.xz
+# 3. install python3
+./configure --prefix=/usr/local/python3 # complie
+make
+make install
+# 4. create new softlink
+mv /usr/bin/python /usr/bin/python_bak
+mv /usr/bin/pip /usr/bin/pip_bak
+ln -s /usr/local/python3/bin/python3 /usr/bin/python
+ln -s /usr/local/python3/bin/pip3 /usr/bin/pip
+# 5. enable pip3
+vim ~/.bash_profile
+
+PATH=$PATH:$HOME/bin:/usr/local/python3/bin
+
+# 6. modify yum: Change the python of the first line of the following file to python3
+vim /usr/bin/yum
+vim /usr/libexec/urlgrabber-ext-down
+```
+
 ## question
 
 - 1. docker 安装映射出来的 log 文件; 但是 没有 log 对比之前的非 docker 安装
