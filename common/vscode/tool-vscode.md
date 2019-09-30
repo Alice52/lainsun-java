@@ -64,6 +64,36 @@
 }
 ```
 
+## keyboard shutcuts
+
+```json
+// Place your key bindings in this file to override the defaults
+[
+  {
+    "key": "ctrl+u",
+    "command": "editor.action.transformToUppercase",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+l",
+    "command": "editor.action.transformToLowercase",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "alt+q",
+    "command": "workbench.action.editor.changeLanguageMode"
+  },
+  {
+    "key": "ctrl+k m",
+    "command": "-workbench.action.editor.changeLanguageMode"
+  },
+  {
+    "key": "alt+e alt+d",
+    "command": "workbench.action.editor.changeEncoding"
+  }
+]
+```
+
 ## plugins
 
 |       plugin-name       | function |
