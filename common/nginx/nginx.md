@@ -1,3 +1,30 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+**Table of Contents** _generated with [DocToc](https://github.com/thlorenz/doctoc)_
+
+- [nginx](#nginx)
+  - [introduce](#introduce)
+  - [nginx 安装](#nginx-%E5%AE%89%E8%A3%85)
+  - [nginx conf](#nginx-conf)
+    - [server](#server)
+    - [location](#location)
+  - [common comand](#common-comand)
+  - [nginx 配置 LOG](#nginx-%E9%85%8D%E7%BD%AE-log)
+  - [nginx 配置反向代理](#nginx-%E9%85%8D%E7%BD%AE%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86)
+  - [nginx 配置负载均衡](#nginx-%E9%85%8D%E7%BD%AE%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1)
+  - [nginx 配置动静分离](#nginx-%E9%85%8D%E7%BD%AE%E5%8A%A8%E9%9D%99%E5%88%86%E7%A6%BB)
+  - [Keepalived/Nginx 高可用集群](#keepalivednginx-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4)
+    - [sample 主从模式](#sample-%E4%B8%BB%E4%BB%8E%E6%A8%A1%E5%BC%8F)
+    - [sample 双主模式](#sample-%E5%8F%8C%E4%B8%BB%E6%A8%A1%E5%BC%8F)
+  - [nginx 原理](#nginx-%E5%8E%9F%E7%90%86)
+    - [master-workers 的机制的好处](#master-workers-%E7%9A%84%E6%9C%BA%E5%88%B6%E7%9A%84%E5%A5%BD%E5%A4%84)
+    - [需要设置多少个 worker](#%E9%9C%80%E8%A6%81%E8%AE%BE%E7%BD%AE%E5%A4%9A%E5%B0%91%E4%B8%AA-worker)
+    - [设置 worker 数量](#%E8%AE%BE%E7%BD%AE-worker-%E6%95%B0%E9%87%8F)
+- [question](#question)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## nginx
 
 ### introduce
@@ -19,6 +46,9 @@
   # check the version and test
   nginx -v
   nginx -t
+
+  # change default port
+  just change config file `/etc/nginx/sites-enabled/default`
   ```
 
 - centos
@@ -58,6 +88,9 @@
 
   # set aoto start
   docker update --restart=always 镜像ID
+
+  # change default port
+  # in this case, we should change the nginx config and reflect port.
   ```
 
 ### nginx conf
@@ -140,6 +173,45 @@
 
   ```
 
+### nginx 配置 LOG
+
+- 1. config /conf.d/default
+
+  ```conf
+  location /logs {
+    # nginx logs content
+    alias NGINX_LOG_PATH;
+    # list content
+    autoindex on;
+    # default show exact size
+    autoindex_exact_size off;
+    # default show file time, change it to file system time
+    autoindex_localtime on;
+    # no cache
+    add_header Cache-Control no-store;
+
+    # nginx auth
+    auth_basic "Restricted";
+    # ngxin log user file
+    auth_basic_user_file NGINX_CONFIG_PATH/loguser;
+  }
+  ```
+
+- 2. config mime.types
+
+  ```types
+  text/log log;
+  ```
+
+- 3. config auth
+
+  ```shell
+  yum -y install httpd-tools
+
+  htpasswd -c NGINX_CONFIG_PATH/loguser loguser
+  # get log auth config from 1.
+  ```
+
 ### nginx 配置反向代理
 
 - 定义:
@@ -150,6 +222,22 @@
   ![avatar](/static/image/nginx/nginx-reverse-proxy.png)
 
 - sample: 将请求代理到 101.132.45.28 server 上的 8001 端口
+
+  ```conf
+  # 1. config 101.37.174.197 conf file
+  location /tomcat {
+    proxy_pass   http://101.132.45.28:8001;
+  }
+  # notice
+  #   1. request: http://101.37.174.197/tomcat will proxy to http://101.132.45.28:8001/tomcat.
+
+  location /image/ {
+    root  html;
+    autoindex on;
+  }
+  # notice
+  #   2. request: http://101.37.174.197/image/xx.jpg will find file in /html/image/xx.jpg.
+  ```
 
 ### nginx 配置负载均衡
 
@@ -169,6 +257,52 @@
 
 - sample: 访问两台 server 上的 tomcat
 
+  ```conf
+  {
+    # ...
+    http: {
+      upstream LOAD_BALANCE_SERVER_NAME {
+        [ip_hash/fair;]
+        server 101.132.45.28:8080 weight=10;
+        server 101.37.174.197:8080 weight=1;
+      }
+      # ...
+
+      server: {
+        location / {
+          # 需要转发请求的服务器--负载均衡也是如此配置
+          proxy_pass   LOAD_BALANCE_SERVER_NAME;
+
+          #Proxy Settings
+          # 是否跳转
+          proxy_redirect     off;
+          # 请求要转发的host
+          proxy_set_header   Host             $host;
+          # 请求的远程地址: 这些在浏览器的header都可看, 不一一解释
+          proxy_set_header   X-Real-IP        $remote_addr;
+          proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+          proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+          proxy_max_temp_file_size 0;
+          # 连接前面的服务器超时时间
+          proxy_connect_timeout      90;
+          # 请求转发数据报文的超时时间
+          proxy_send_timeout         90;
+          # 读取超时时间
+          proxy_read_timeout         90;
+          # 缓冲区的大小
+          proxy_buffer_size          4k;
+          proxy_buffers              4 32k;
+          # proxy_buffers缓冲区, 网页平均在32k以下的
+          proxy_busy_buffers_size    64k;
+          # 高负荷下缓冲大小(proxy_buffers*2)
+          proxy_temp_file_write_size 64k;
+        }
+        # ...
+      }
+    }
+  }
+  ```
+
 ### nginx 配置动静分离
 
 - 定义:
@@ -179,6 +313,22 @@
   ![avatar](/static/image/nginx/nginx-static-dynamic.png)
 
 - sample
+
+  ```conf
+  {
+    # ...
+    location / {
+      root html;
+      index index.html index.htm;
+    }
+
+    # proxy to other server, such as oss
+    location /static/ {
+      root html;
+      autoindex on;
+    }
+  }
+  ```
 
 ### Keepalived/Nginx 高可用集群
 
@@ -226,4 +376,9 @@ worker_cpu_affinity 0000001 00000010 00000100 00001000
 ## question
 
 - 1. 403 forbbiden
+
   - maybe it shoud be config `autoindex on`.
+
+- 2. log in web
+
+  - solution in [nginx 配置 LOG](#nginx-%E9%85%8D%E7%BD%AE-log)

@@ -1,18 +1,18 @@
-## Spring
+## spring
 
-### Spring Modules
+### spring modules
 
-#### Overview
+#### overview
 
-- Overview: history, design philosophy, feedback, getting started.
-- Core: IoC Container, Events, Resources, i18n, Validation, Data Binding, Type Conversion, SpEL, AOP.
-- Testing: Mock Objects, TestContext Framework, Spring MVC Test, WebTestClient.
-- Data Access: Transactions, DAO Support, JDBC, O/R Mapping, XML Marshalling.
-- Web Servlet: Spring MVC, WebSocket, SockJS, STOMP Messaging.
-- Web Reactive: Spring WebFlux, WebClient, WebSocket.
-- Integration: Remoting, JMS, JCA, JMX, Email, Tasks, Scheduling, Caching.
-- Languages:Kotlin, Groovy, Dynamic Languages.
+- overview: history, design philosophy, feedback, getting started.
+- core: ioc container, events, resources, i18n, validation, data binding, type conversion, spel, aop.
+- testing: mock objects, testcontext framework, spring mvc test, webtestclient.
+- data access: transactions, dao support, jdbc, o/r mapping, xml marshalling.
+- web servlet: spring mvc, websocket, sockjs, stomp messaging.
+- web reactive: spring webflux, webclient, websocket.
+- integration: remoting, jms, jca, jmx, email, tasks, scheduling, caching.
+- languages:kotlin, groovy, dynamic languages.
 
-#### Schematic diagram
+#### schematic diagram
 
 ![avatar](/static/image/spring/spring-module.png)
