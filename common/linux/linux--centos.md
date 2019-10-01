@@ -35,15 +35,14 @@ sudo yum makecache
 ### install docker
 
 ```shell
-# Install required packages
+# 1. install required packages
 yum install -y yum-utils device-mapper-persistent-data lvm2
-# 配置阿里云加速
+# 2. 配置阿里云加速
 sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-# 查看
 cat etc/yum.repos.d/docker-ce.repo
-# install docker
+# 3. install docker
 sudo yum install docker-ce
-# start dcoker
+# 4. start dcoker
 systemctl start docker
 # 配置镜像加速
 docker vim /etc/docker/daemon.json
@@ -55,6 +54,14 @@ docker vim /etc/docker/daemon.json
 docker sudo systemctl daemon-reload
 docker sudo systemctl restart docker
 
+# set docker auto start
+systemctl is-enabled docker.service
+systemctl enable docker.service
+systemctl start docker.service
+
+systemctl disable docker.service
+systemctl stop docker.service
+systemctl restart docker.service
 
 # docker 开机自启动容器
 docker update --restart=always 镜像ID
@@ -122,9 +129,30 @@ vim ~/.bash_profile
 
 PATH=$PATH:$HOME/bin:/usr/local/python3/bin
 
+source ~/.bash_profile
 # 6. modify yum: Change the python of the first line of the following file to python3
 vim /usr/bin/yum
 vim /usr/libexec/urlgrabber-ext-down
+```
+
+### install goaccess
+
+```shell
+# 1. install dependy
+yum -y install glib2 glib2-devel ncurses ncurses-devel GeoIP GeoIP-devel
+# 2. get source code
+wget http://tar.goaccess.io/goaccess-1.3.tar.gz
+tar -zxvf goaccess-1.3.tar.gz && cd goaccess
+# 3. compile
+./configure --prefix=/usr/local/goaccess --enable-utf8 --enable-geoip
+make
+make install
+# 4. add goaccess to PATH
+vim ~/.bash_profile
+
+PATH=$PATH:$HOME/bin:/usr/local/goaccess/bin
+
+source ~/.bash_profile
 ```
 
 ## question

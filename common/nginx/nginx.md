@@ -23,8 +23,6 @@
     - [设置 worker 数量](#%E8%AE%BE%E7%BD%AE-worker-%E6%95%B0%E9%87%8F)
 - [question](#question)
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 ## nginx
 
 ### introduce
@@ -32,9 +30,15 @@
 - definition:
   nginx 是一个高性能的 `HTTP 和 反向代理服务器`. Nginx `专为性能优化而开发`, 负载能力强[50 000 并发连接数]
 - feature
-  - 高性能
-  - 内存少
-  - 并发能力强[高负载]
+  - 高并发/高性能
+  - 高可靠性
+  - 可扩展性
+  - 热部署
+  - BSD Lisence
+- apply
+  - static resource
+  - reverse proxy[accelerate/cache]
+  - API server
 
 ### nginx 安装
 
@@ -175,6 +179,8 @@
 
 ### nginx 配置 LOG
 
+#### web
+
 - 1. config /conf.d/default
 
   ```conf
@@ -211,6 +217,39 @@
   htpasswd -c NGINX_CONFIG_PATH/loguser loguser
   # get log auth config from 1.
   ```
+
+#### goaccess
+
+```shell
+# install goacess
+yum -y install glib2 glib2-devel ncurses ncurses-devel GeoIP GeoIP-devel
+wget http://tar.goaccess.io/goaccess-1.3.tar.gz
+tar -zxvf goaccess-1.3.tar.gz && cd goaccess-1.3
+./configure --prefix=/usr/local/goaccess --enable-utf8 --enable-geoip
+# add path to env
+
+# start new socket to listen log change
+/usr/local/goaccess/bin/goaccess access.log -o /root/nginx/www/report/report.html --real-time-html --time-format='%H:%M:%S' --date-format='%d/%b/%Y' --log-format=COMBINED
+```
+
+### nginx 配置 gzip
+
+- conf
+
+  ```conf
+  gzip on;
+  gzip_buffers 32 4K;
+  gzip_comp_level 6;
+  gzip_min_length 100;
+  gzip_types application/javascript text/css text/xml text/log;
+  #配置禁用gzip条件，支持正则。此处表示ie6及以下不启用gzip（因为ie低版本不支持）
+  gzip_disable "MSIE [1-6]\.";
+  gzip_vary on;
+  ```
+
+- notice
+  1. 比较小的文件不必压缩
+  2. 图片/mp3 这样的二进制文件, 不必压缩: 因为压缩率比较小, 比如 100->80 字节,而且压缩也是耗费 CPU 资源的.
 
 ### nginx 配置反向代理
 
