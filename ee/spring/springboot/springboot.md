@@ -2,6 +2,15 @@
 
 ---
 
+## spring boot code
+
+1. pom.xml
+2. applicationContext.xml
+3. config bean
+4. code logic
+
+---
+
 ## 配置类
 
 ```java
@@ -231,7 +240,7 @@ occur exception -->  spring的 @ControllerAdvice + @ExceptionHandler 对异常�
 ## spring boot test class
 
 ```java
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = RabbitmqSenderApplication.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(classes = ActivemqSenderApplication.class)
 @WebAppConfiguration
 ```

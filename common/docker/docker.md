@@ -1,3 +1,7 @@
+### docker directory structure
+
+- log: `/var/lib/docker/container`
+
 ### common comand
 
     ```shell
@@ -77,6 +81,14 @@
     docker run -d -p 5672:5672 -p 15672:15672 --name rabbitmq 3f92e6354d11
 
     docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 -v /root/rabbitmq/data:/var/lib/rabbitmq -v /root/rabbitmq/logs:/var/log/rabbitmq  --hostname rabbit -e RABBITMQ_DEFAULT_VHOST=/ -e RABBITMQ_DEFAULT_USER=guest -e RABBITMQ_DEFAULT_PASS=guest 3f92e6354d11
+    ```
+
+### install activemq
+
+    ```shell
+    docker pull webcenter/activemq
+
+    docker run -d --name activemq -p 8161:8161 -p 61613:61613 -p 61616:61616 -v /root/activemq/conf:/opt/activemq/conf -v /root/activemq/data:/data/activemq -v /root/activemq/lib/custom:/opt/activemq/lib/custom -v /root/activemq/logs:/var/log/activemq webcenter/activemq
     ```
 
 ### install mongodb

@@ -53,6 +53,7 @@
 |      ALT + ENTER      |           导包           |
 |      SHIFT + F6       |          rename          |
 |       CTRL + H        |          类层次          |
+|       CTRL + H        |           子类           |
 |    CTRL + ALT + B     |          类层次          |
 |       CTRL + B        |          进入类          |
 |        Ctrl+N         |          查找类          |
