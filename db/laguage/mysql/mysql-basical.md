@@ -283,7 +283,9 @@ DROP TABLE [IF EXISTS] TBALENAME;
 
   -- more case in select
   SELECT CASE WHEN condition THEN VALUE1 ELSE VALUE2 END AS totalCashDrop,
-  COALESCE(SUM(CASE WHEN ftt.TransactionType = 'TABLE_FILL' THEN ftt.Amount ELSE 0 END), 0) AS totalTableFill,
+  COALESCE(SUM(CASE WHEN ftt.TransactionType = 'TABLE_FILL' THEN ftt.Amount ELSE 0 END), 0) AS totalTableFill
+  FROM ...
+  WHERE...
   ```
 - if elseif
   ```sql
