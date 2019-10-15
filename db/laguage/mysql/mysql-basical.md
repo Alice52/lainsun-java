@@ -241,6 +241,7 @@ DROP TABLE [IF EXISTS] TBALENAME;
 1.  包含以下关键字的 VIEW 不能更新: 分组函数, DISTINCT, GROUP BY, HAVING, UNION [ALL], 常量视图, **`SELECT 中包含子查询 JOIN ... FROM 一个不能更新的视图 WHERE 子句的子查询引用了 FROM 子句中的表`**
 
 ## 9. SP
+
 - 9.1 definition: a collection of pre-compiled sql statements
 - 9.2 feature
   - reuse
@@ -249,37 +250,42 @@ DROP TABLE [IF EXISTS] TBALENAME;
 - 9.3 syntax
   ```sql
   CREATE PROCEDURE SP_NAME (IN|OUT|INOUT ARGUS  DATATYPE, ...)
-	BEGIN
-		SP_BODY
-	END
+  N
+  Y
+  D
   ```
 - 9.4 use
   ```sql
   call SP_NAME(SP_PARAMETERS)
   ```
+
 ### variable
+
 ### Process control
+
 - if function
   ```sql
   IF (condition, value1, value2)
-	```
+  `
+  ```
 - case
+
   ```sql
   -- one
   CASE 表达式
-	WHEN 值1 THEN 结果1或语句1(如果是语句, 需要加分号)
-	WHEN 值2 THEN 结果2或语句2(如果是语句, 需要加分号)
-	...
-	ELSE 结果N或语句N(如果是语句, 需要加分号)
-	END AS COLUMN_NAME
+  )
+  )
+  .
+  )
+  E
 
   -- other
-  case 
-	when 条件1 then 结果1或语句1(如果是语句, 需要加分号)
-	when 条件2 then 结果2或语句2(如果是语句, 需要加分号)
-	...
-	else 结果n或语句n(如果是语句, 需要加分号)
-	end AS COLUMN_NAME
+  case
+  )
+  )
+  .
+  )
+  E
 
   -- more case in select
   SELECT CASE WHEN condition THEN VALUE1 ELSE VALUE2 END AS totalCashDrop,
@@ -287,22 +293,24 @@ DROP TABLE [IF EXISTS] TBALENAME;
   FROM ...
   WHERE...
   ```
+
 - if elseif
   ```sql
   IF 情况1 THEN 语句1;
-	ELSEIF 情况2 THEN 语句2;
-	...
-	ELSE 语句N;
-	END IF;
+  ;
+  .
+  ;
+  ;
   ```
 - while
   ```sql
   LABEL: WHILE 循环条件  DO
-		循环体
-	END WHILE LABEL;
+  体
+  ;
   ```
 
 ## 10. function
+
 ```sql
 CREATE FUNCTION FUNCTION_NAME(PARAMETER PARAMETER_TYPE, ...)RETURNS DATATYPE
 	BEGIN
@@ -311,28 +319,30 @@ CREATE FUNCTION FUNCTION_NAME(PARAMETER PARAMETER_TYPE, ...)RETURNS DATATYPE
 
 SELECT FUNCTION_NAME(PARAMETERS)
 ```
+
 ## diff
+
 - 函数和存储过程的区别
-	|type|关键字|调用语法|返回值|应用场景
-  |:--:|:--:|:--:|:--:|:--:|
-	|函数	|	FUNCTION	SELECT 函数()|	只能是一个|		一般用于查询结果为一个值并返回时, 当有返回值而且仅仅一个|
-	|存储过程	|PROCEDURE	|CALL 存储过程()|	可以有0个或多个	|	一般用于更新|
+
+  |   type   |         关键字         |    调用语法     |                          返回值                          |   应用场景   |
+  | :------: | :--------------------: | :-------------: | :------------------------------------------------------: | :----------: |
+  |   函数   | FUNCTION SELECT 函数() |   只能是一个    | 一般用于查询结果为一个值并返回时, 当有返回值而且仅仅一个 |
+  | 存储过程 |       PROCEDURE        | CALL 存储过程() |                    可以有 0 个或多个                     | 一般用于更新 |
 
 - 用户变量和局部变量
 
-  |作用域|定义位置|语法|
-  |:--:|:--:|:--:|
-  |用户变量|当前会话|会话的任何地方|加@符号, 不用指定类型|
-  |局部变量|定义它的BEGIN END中 |BEGIN END的第一句话	一般不用加@,需要指定类型|
+  |  作用域  |       定义位置        |                     语法                      |
+  | :------: | :-------------------: | :-------------------------------------------: |
+  | 用户变量 |       当前会话        |     会话的任何地方, 加@符号, 不用指定类型     |
+  | 局部变量 | 定义它的 BEGIN END 中 | BEGIN END 的第一句话 一般不用加@,需要指定类型 |
 
 - 流程控制
-  
-  | type| 应用场合|
-  |:--:|:--:|
-	|if函数| 简单双分支|
-	|case结构| 等值判断的多分支|
-	|if结构| 区间判断的多分支|
 
+  |   type    |     应用场合     |
+  | :-------: | :--------------: |
+  |  if 函数  |    简单双分支    |
+  | case 结构 | 等值判断的多分支 |
+  |  if 结构  | 区间判断的多分支 |
 
 ---
 
@@ -340,44 +350,44 @@ SELECT FUNCTION_NAME(PARAMETERS)
 
 1. 字符
 
-  ```sql
-  Concat() -- 连接 select
-  Left()-- 返回串左边的字符
-  Length() -- 返回串的长度
-  Locate()-- 找出串的一个子串
-  Lower()-- 将串转换为小写
-  Trim()
-  LTrim()-- 去掉串左边的空格
-  RTrim()-- 去掉串右边的空格
-  Right()-- 返回串右边的字符
-  Soundex()-- 返回串的SOUNDEX值
-  SubString()-- 返回子串的字符
-  Upper()-- 将串转换为大写
-  ```
+```sql
+Concat() -- 连接 select
+Left()-- 返回串左边的字符
+Length() -- 返回串的长度
+Locate()-- 找出串的一个子串
+Lower()-- 将串转换为小写
+Trim()
+LTrim()-- 去掉串左边的空格
+RTrim()-- 去掉串右边的空格
+Right()-- 返回串右边的字符
+Soundex()-- 返回串的SOUNDEX值
+SubString()-- 返回子串的字符
+Upper()-- 将串转换为大写
+```
 
 2. 时间
 
-  ```sql
-  Now()
-  AddDate()-- 增加一个日期（天、周等）
-  AddTime()-- 增加一个时间（时、分等）
-  CurDate()-- 返回当前日期
-  CurTime()-- 返回当前时间
-  Date()-- 返回日期时间的日期部分
-  DateDiff()-- 计算两个日期之差
-  Date_Add()-- 高度灵活的日期运算函数
-  str_to_date()
-  Date_Format()-- 返回一个格式化的日期或时间串
-  Day()-- 返回一个日期的天数部分
-  DayOfWeek()-- 对于一个日期, 返回对应的星期几
-  Hour()-- 返回一个时间的小时部分
-  Minute()-- 返回一个时间的分钟部分
-  Month()-- 返回一个日期的月份部分
-  Now()-- 返回当前日期和时间
-  Second()-- 返回一个时间的秒部分
-  Time()-- 返回一个日期时间的时间部分
-  Year()-- 返回一个日期的年份部分
-  ```
+```sql
+Now()
+AddDate()-- 增加一个日期（天、周等）
+AddTime()-- 增加一个时间（时、分等）
+CurDate()-- 返回当前日期
+CurTime()-- 返回当前时间
+Date()-- 返回日期时间的日期部分
+DateDiff()-- 计算两个日期之差
+Date_Add()-- 高度灵活的日期运算函数
+str_to_date()
+Date_Format()-- 返回一个格式化的日期或时间串
+Day()-- 返回一个日期的天数部分
+DayOfWeek()-- 对于一个日期, 返回对应的星期几
+Hour()-- 返回一个时间的小时部分
+Minute()-- 返回一个时间的分钟部分
+Month()-- 返回一个日期的月份部分
+Now()-- 返回当前日期和时间
+Second()-- 返回一个时间的秒部分
+Time()-- 返回一个日期时间的时间部分
+Year()-- 返回一个日期的年份部分
+```
 
 - 时间 FORMAT
 
@@ -395,31 +405,31 @@ SELECT FUNCTION_NAME(PARAMETERS)
 
 3. 数学函数
 
-  ```sql
-  round  -- 四舍五入
-  rand -- 随机数
-  floor -- 向下取整
-  ceil -- 向上取整
-  mod -- 取余
-  truncate -- 截断
-  ```
+```sql
+round  -- 四舍五入
+rand -- 随机数
+floor -- 向下取整
+ceil -- 向上取整
+mod -- 取余
+truncate -- 截断
+```
 
 4. 流程控制函数
 
-  ```sql
-  if 处理双分支
-  case语句 处理多分支
-      情况1：处理等值判断
-      情况2：处理条件判断
-  ```
+```sql
+if 处理双分支
+case语句 处理多分支
+    情况1：处理等值判断
+    情况2：处理条件判断
+```
 
 5. 其他函数
 
-  ```sql
-  version版本
-  database当前库
-  user当前连接用户
-  ```
+```sql
+version版本
+database当前库
+user当前连接用户
+```
 
 ---
 
