@@ -264,9 +264,17 @@ DROP TABLE [IF EXISTS] TBALENAME;
 ### Process control
 
 - if function
-  ```sql
+  ````sql
   IF (condition, value1, value2)
   `
+  ````
+- if elseif
+  ```sql
+  IF 情况1 THEN 语句1;
+  ;
+  .
+  ;
+  ;
   ```
 - case
 
@@ -307,6 +315,60 @@ DROP TABLE [IF EXISTS] TBALENAME;
   LABEL: WHILE 循环条件  DO
   体
   ;
+  ```
+- loop
+  ```sql
+  LABEL: LOOP
+  ;
+  END LOOP LABEL;
+  ```
+- repeat
+  ```sql
+  LABEL: REPEAT
+  ;
+  UNTIL 结束循环的条件
+  END REPEAT LABEL;
+  ```
+- sample
+
+  ```sql
+  TRUNCATE TABLE admin$
+  DROP PROCEDURE test_while1$
+  CREATE PROCEDURE test_while1(IN insertCount INT)
+  BEGIN
+    DECLARE i INT DEFAULT 1;
+    a:WHILE i<=insertCount DO
+      INSERT INTO admin(username,`password`) VALUES(CONCAT('xiaohua',i),'0000');
+      IF i>=20 THEN LEAVE a;
+      -- IF MOD(i,2)!=0 THEN ITERATE a;
+      END IF;
+      SET i=i+1;
+    END WHILE a;
+  END $
+
+  -- two
+  DROP TABLE IF EXISTS stringcontent;
+  CREATE TABLE stringcontent(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    content VARCHAR(20)
+
+  );
+  DELIMITER $
+  CREATE PROCEDURE test_randstr_insert(IN insertCount INT)
+  BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE str VARCHAR(26) DEFAULT 'abcdefghijklmnopqrstuvwxyz';
+    DECLARE startIndex INT;#代表初始索引
+    DECLARE len INT;#代表截取的字符长度
+    WHILE i<=insertcount DO
+      SET startIndex=FLOOR(RAND()*26+1);#代表初始索引，随机范围1-26
+      SET len=FLOOR(RAND()*(20-startIndex+1)+1);#代表截取长度，随机范围1-（20-startIndex+1）
+      INSERT INTO stringcontent(content) VALUES(SUBSTR(str,startIndex,len));
+      SET i=i+1;
+    END WHILE;
+  END $
+
+  CALL test_randstr_insert(10)$
   ```
 
 ## 10. function
