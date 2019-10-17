@@ -5,6 +5,7 @@
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
 
 # 2. 注册 Microsoft SQL Server Ubuntu 存储库[version]
+# python 2
 sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/16.04/mssql-server-2017.list)"
 
 # 3. 安装 SQL Server
@@ -33,10 +34,10 @@ apt-get remove mssql-server
 sudo rm -rf /var/opt/mssql/
 ```
 
-
 ## Common Command
+
 ```sql
--- get timezone 
+-- get timezone
 DECLARE @TimeZone VARCHAR(50)
 EXEC MASTER.dbo.xp_regread 'HKEY_LOCAL_MACHINE',
 'SYSTEM\CurrentControlSet\Control\TimeZoneInformation',
@@ -44,29 +45,34 @@ EXEC MASTER.dbo.xp_regread 'HKEY_LOCAL_MACHINE',
 SELECT @TimeZone
 ```
 
---- 
+---
+
 ## Common Issue
+
 - 1. `JPA SQL Server No Dialect mapping for JDBC type: -9`
-    - default configuration
-    ```xml
-    <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect"/>
-    ```
 
-    - solution: donot use built-in dialect and define own dialect as below
-    ```java
-    import java.sql.Types;
-    import org.hibernate.dialect.SQLServerDialect;
-    import org.hibernate.type.StandardBasicTypes;
+  - default configuration
 
-    public class SQlServerDBDialect extends SQLServerDialect {
-        public SQlServerDBDialect() {
-            super();
-            registerHibernateType(Types.NCHAR, StandardBasicTypes.CHARACTER.getName()); 
-            registerHibernateType(Types.NCHAR, 1, StandardBasicTypes.CHARACTER.getName());
-            registerHibernateType(Types.NCHAR, 255, StandardBasicTypes.STRING.getName());
-            registerHibernateType(Types.NVARCHAR, StandardBasicTypes.STRING.getName());
-            registerHibernateType(Types.LONGNVARCHAR, StandardBasicTypes.TEXT.getName());
-            registerHibernateType(Types.NCLOB, StandardBasicTypes.CLOB.getName());
-        }
-    }
-    ```
+  ```xml
+  <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect"/>
+  ```
+
+  - solution: donot use built-in dialect and define own dialect as below
+
+  ```java
+  import java.sql.Types;
+  import org.hibernate.dialect.SQLServerDialect;
+  import org.hibernate.type.StandardBasicTypes;
+
+  public class SQlServerDBDialect extends SQLServerDialect {
+      public SQlServerDBDialect() {
+          super();
+          registerHibernateType(Types.NCHAR, StandardBasicTypes.CHARACTER.getName());
+          registerHibernateType(Types.NCHAR, 1, StandardBasicTypes.CHARACTER.getName());
+          registerHibernateType(Types.NCHAR, 255, StandardBasicTypes.STRING.getName());
+          registerHibernateType(Types.NVARCHAR, StandardBasicTypes.STRING.getName());
+          registerHibernateType(Types.LONGNVARCHAR, StandardBasicTypes.TEXT.getName());
+          registerHibernateType(Types.NCLOB, StandardBasicTypes.CLOB.getName());
+      }
+  }
+  ```
