@@ -87,8 +87,9 @@
 
     ```shell
     docker pull webcenter/activemq
-
-    docker run -d --name activemq -p 8161:8161 -p 61613:61613 -p 61616:61616 -v /root/activemq/conf:/opt/activemq/conf -v /root/activemq/data:/data/activemq -v /root/activemq/lib/custom:/opt/activemq/lib/custom -v /root/activemq/logs:/var/log/activemq webcenter/activemq
+    # -v /root/activemq/lib/custom:/opt/activemq/lib/custom
+    #  the jar must be in /lib
+    docker run -d --name activemq -p 8161:8161 -p 61613:61613 -p 61616:61616 -v /root/activemq/conf:/opt/activemq/conf -v /root/activemq/data:/data/activemq -v /root/activemq/logs:/var/log/activemq webcenter/activemq
     ```
 
 ### install mongodb

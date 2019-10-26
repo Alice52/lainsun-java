@@ -53,40 +53,40 @@ cd ACTIVEMQ_BIN
 
 #### high available
 
-- cluster
-- persistence and store in db
+- cluster[Replicated LevelDB Store + Zookeeper]
+- persistence
 
   - queue producer: the previous message will be restore.
 
-  ```java
-  // producer
-  connection.start();
-  ...
-  producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+    ```java
+    // producer
+    connection.start();
+    ...
+    producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
-  // consumer
-  connection.start();
-  ...
-  MessageConsumer consumer = session.createConsumer(topic);
-  ```
+    // consumer
+    connection.start();
+    ...
+    MessageConsumer consumer = session.createConsumer(topic);
+    ```
 
   - topic producer: the previous message will be missing.
 
-  ```java
-  // publisher
-  producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-  connection.start();
+    ```java
+    // publisher
+    producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+    connection.start();
 
-  // subscriber
-  TopicSubscriber topicSubscriber = session.createDurableSubscriber(topic, UUID.randomUUID().toString());
-  connection.start();
-  ```
+    // subscriber
+    TopicSubscriber topicSubscriber = session.createDurableSubscriber(topic, UUID.randomUUID().toString());
+    connection.start();
+    ```
 
   - message:
 
-  ```java
-  message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
-  ```
+    ```java
+    message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
+    ```
 
 - acknowledge[consumer]
 
@@ -106,10 +106,133 @@ cd ACTIVEMQ_BIN
   session.commit(); // for rollback
 
   // consumer
-  // if the consumer open transaction, must be use commit; otherwise it will lead message duplicated conusmer.
+  // if the consumer open transaction, must be use commit;
+  // otherwise it will lead message duplicated conusmer.
   ```
 
+- store in db
+
 ##### durable in db[mysql/kahadb/journal]
+
+###### kahadb: DB sys based on file
+
+- dir
+
+  ```js
+  kahadb: BTree
+   ├── db-1.log: store data
+   ├── db.data: store index
+   ├── db.redo: recovery BTree
+   ├── db.free: free page in data
+   └── lock
+  ```
+
+- mysql dir
+  ```js
+  user.frm: table structure
+  user.MYD: data
+  user.MYI: index
+  user.ibd: belong to InnoDB
+  ```
+
+###### JDBC
+
+1. add `mysql-connector-java-5.1.48.jar` to /lib
+2. config persistenceAdapter in `activemq.xml`:
+
+   ```xml
+   <!-- createTablesOnStartup: first is true to create tables, then change to false -->
+   <!-- createTablesOnStartup: create tables when startup -->
+   <persistenceAdapter>
+      <jdbcPersistenceAdapter dataSource="#mysql-ds" createTablesOnStartup="true"/>
+   </persistenceAdapter>
+
+   <!-- below tag </broker> and before <import> -->
+   <bean id="mysql-ds" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+      <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+      <property name="url" value="jdbc:mysql://101.132.45.28:3306/activemq?relaxAutoCommit=true"/>
+      <property name="username" value="root"/>
+      <property name="password" value="Yu******"/>
+      <property name="maxTotal" value="200"/>
+      <property name="poolPreparedStatements" value="true"/>
+   </bean>
+   ```
+
+3. tables
+
+   ```sql
+   -- ACTIVEMQ_ACKS
+   CREATE TABLE `ACTIVEMQ_ACKS` (
+       `CONTAINER` varchar(250) NOT NULL COMMENT DESTINATION,
+       `SUB_DEST` varchar(250) DEFAULT NULL COMMENT StaticInfo,
+       `CLIENT_ID` varchar(250) NOT NULL COMMENT SUBSCRIBERID,
+       `SUB_NAME` varchar(250) NOT NULL COMMENT SUBSCRIBERNAME,
+       `SELECTOR` varchar(250) DEFAULT NULL COMMENT SELECTOKMSG,
+       `LAST_ACKED_ID` bigint(20) DEFAULT NULL COMMENT CONSUMEDMSG,
+       -- default PRIORITY is 5, 0-4: will not seq, but will Prior to 6-9
+       `PRIORITY` bigint(20) NOT NULL DEFAULT '5',
+       `XID` varchar(250) DEFAULT NULL,
+       PRIMARY KEY (`CONTAINER`,`CLIENT_ID`,`SUB_NAME`,`PRIORITY`),
+       KEY `ACTIVEMQ_ACKS_XIDX` (`XID`)
+   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+   -- ACTIVEMQ_LOCK
+   CREATE TABLE `ACTIVEMQ_LOCK` (
+       -- FOR CLUSTER
+       `ID` bigint(20) NOT NULL,
+       `TIME` bigint(20) DEFAULT NULL,
+       `BROKER_NAME` varchar(250) DEFAULT NULL,
+       PRIMARY KEY (`ID`)
+   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+   -- ACTIVEMQ_MSGS
+   CREATE TABLE `ACTIVEMQ_MSGS` (
+       `ID` bigint(20) NOT NULL COMMENT AUTOINCR,
+       `CONTAINER` varchar(250) DEFAULT NULL COMMENT DESTINATION,
+       -- MSGID_PROD + MSGID_SEQ = JMS MESSAGEID
+       `MSGID_PROD` varchar(250) DEFAULT NULL COMMENT PRODUCERID,
+       `MSGID_SEQ` bigint(20) DEFAULT NULL COMMENT MSGSQUENCE,
+       `EXPIRATION` bigint(20) DEFAULT NULL COMMENT MSGEXPIRATION,
+       `MSG` longblob  COMMENT MSGBINCONTENT,
+       `PRIORITY` bigint(20) DEFAULT NULL COMMENT 0-9,
+       `XID` varchar(250) DEFAULT NULL,
+       PRIMARY KEY (`ID`),
+       KEY `ACTIVEMQ_MSGS_MIDX` (`MSGID_PROD`,`MSGID_SEQ`),
+       KEY `ACTIVEMQ_MSGS_CIDX` (`CONTAINER`),
+       KEY `ACTIVEMQ_MSGS_EIDX` (`EXPIRATION`),
+       KEY `ACTIVEMQ_MSGS_PIDX` (`PRIORITY`),
+       KEY `ACTIVEMQ_MSGS_XIDX` (`XID`)
+   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+   ```
+
+4. producer should be enable DeliveryMode.PERSISTENT
+
+   ```java
+   producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+   ```
+
+5. notice
+
+   ```markdown
+   QUEUE: when produce message will insert data in table `ACTIVEMQ_MSGS`, consume message will delete data.
+   TOPIC: subscriber durable in `ACTIVEMQ_ACKS`, and the message will be store in db.
+   ```
+
+###### JDBC Journaling
+
+2. config persistenceAdapter in `activemq.xml`:
+   ```xml
+   <persistenceFactory>
+       <journalPersistenceAdapterFactory
+               journalLogFiles="4"
+               journalLogFileSize="32768"
+               useJournal="true"
+               useQuickJournal="true"
+               dataSource="#mysql-ds"
+               dataDirectory="activemq-data"/>
+   </persistenceFactory>
+   ```
+3. message will be record in db, donot be deleted
 
 ### JMS consumer and producer
 
@@ -354,3 +477,211 @@ cd ACTIVEMQ_BIN
     nio://101.37.174.197:61616
   -->
   ```
+
+## retry
+
+- default: will retry 6 times
+
+## interivew
+
+1. 引入消息队列之后如何保证其高可用性
+   - persistence
+   - ack
+   - transation
+   - durable
+   - cluster: zookeeper + replicateddb-leveldb-store
+2. 异步投送:
+
+   - default is async, except Specify sync mode or send persistence message without transaction
+   - allow little data loss
+
+   ```java
+   // method 01
+   public static final String NIO_ACTIVEMQ_URL = "nio://101.37.174.197:61613?jms.useAsyncSend=true";
+
+    // method 02
+    // ((ActiveMQConnectionFactory)connectionFactory).setUseAsyncSend(true);
+    activeMQConnectionFactory.setUseAsyncSend(true);  // set async mode
+
+    // method 03
+    ((ActiveMQConnection)connection).setUseAsyncSend(true);
+   ```
+
+   - how to guarantee message send success: need receive callback
+
+   ```java
+   // 异步发送需要接受回执并有客户端在判断以此是否成功
+   // 如果 MQ 宕机了, 此时生产者端内存内的消息都会丢失; 因此正确的异步发送是需要接受回调需要接受回调.
+    // 1. create session
+    ActiveMQConnection connection = (ActiveMQConnection) ActiveMQUtil.getConnection();
+    connection.setUseAsyncSend(true); // set async send
+    // if the arg of transacted is true, should be commit.
+    Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    // 2. create destination
+    Queue queue = session.createQueue(QUEUE_NAME);
+    // 3. create producer
+    ActiveMQMessageProducer producer = (ActiveMQMessageProducer) session.createProducer(queue);
+    producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+
+    // 4. create message and send
+    for (int i = 0; i < 4; i++) {
+      TextMessage textMessage = session.createTextMessage("p2p message: " + i);
+      String messageID = UUID.randomUUID().toString();
+      textMessage.setJMSMessageID(messageID);
+      producer.send(
+          textMessage,
+          new AsyncCallback() {
+            @Override
+            public void onSuccess() {
+              LOGGER.info(
+                  "producer: {} send message[{}]: {} to queue: {} success.",
+                  producer,
+                  messageID,
+                  textMessage,
+                  QUEUE_NAME);
+            }
+
+            @Override
+            public void onException(JMSException exception) {
+              LOGGER.error(
+                  "producer: {} send message[{}]: {} to queue: {} failed, exception info: {}",
+                  producer,
+                  messageID,
+                  textMessage,
+                  QUEUE_NAME,
+                  exception);
+            }
+          });
+    }
+    // 5. close resource
+    producer.close();
+    connection.close();
+    ActiveMQUtil.getSession(session);
+   ```
+
+3. 延时投送和定时投送
+
+   - introduce
+
+   |    Property name     |  type  |                                              description                                               |
+   | :------------------: | :----: | :----------------------------------------------------------------------------------------------------: |
+   | AMQ_SCHEDULED_DELAY  |  long  | The time in milliseconds that a message will wait before being scheduled to be delivered by the broker |
+   | AMQ_SCHEDULED_PERIOD |  long  |   The time in milliseconds to wait after the start time to wait before scheduling the message again    |
+   | AMQ_SCHEDULED_REPEAT |  int   |                    The number of times to repeat scheduling a message for delivery                     |
+   |  AMQ_SCHEDULED_CRON  | String |                                  Use a Cron entry to set the schedule                                  |
+
+   - config
+
+   ```java
+   <broker xmlns="http://activemq.apache.org/schema/core" brokerName="localhost" dataDirectory="${activemq.data}" schedulerSupport="true">
+   error: Attribute "schedulerSupport" was already specified for element "broker".
+   ```
+
+   - ScheduleMessage
+
+   ```java
+    TextMessage textMessage = session.createTextMessage("p2p message: " + i);
+    textMessage.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay);
+    textMessage.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_PERIOD, period);
+    textMessage.setIntProperty(ScheduledMessage.AMQ_SCHEDULED_REPEAT, repeat);
+   ```
+
+4. 分发策略
+5. activemq 的消息重试机制
+
+   - when
+
+   ```log
+   1. client use transaction, then rollback in session.
+   2. client use transaction, then donot commit or exception before commit
+   3. client use CLIENT_ACKNOWLEDGE mode, the recover in session.
+   ```
+
+   - times and interval: 1 sec, 6 times
+   - Redelivery Policy
+
+   |         Property         | Default Value | Description                                                                                   |
+   | :----------------------: | :-----------: | :-------------------------------------------------------------------------------------------- |
+   |    backOffMultiplier     |       5       | The back-off multiplier.                                                                      |
+   | collisionAvoidanceFactor |     0.15      | The percentage of range of collision avoidance if enabled.                                    |
+   |  initialRedeliveryDelay  |     1000L     | The initial redelivery delay in milliseconds.                                                 |
+   |   maximumRedeliveries    |       6       | Sets maximum redelivered time before considered a poisoned pill                               |
+   |  maximumRedeliveryDelay  |      -1       | Sets maximum delivery delay when useExponentialBackOff option is set. -1: maximum be applied) |
+   |                          |               | or put to Dead Letter Queue. -1 : unlimited redeliveries.                                     |
+   |     redeliveryDelay      |     1000L     | The delivery delay if initialRedeliveryDelay=0 (v5.4).                                        |
+   |  useCollisionAvoidance   |     false     | Should the redelivery policy use collision avoidance.                                         |
+   |  useExponentialBackOff   |     false     | Should exponential back-off be used, i.e., to exponentially increase the timeout.             |
+
+   - 有毒消息 Poison ACK: 6 time later
+
+   ```java
+    ActiveMQConnectionFactory activeMQConnectionFactory =
+                new ActiveMQConnectionFactory(Constants.NIO_ACTIVEMQ_URL);
+
+    RedeliveryPolicy queuePolicy = new RedeliveryPolicy();
+    queuePolicy.setInitialRedeliveryDelay(100);
+    queuePolicy.setRedeliveryDelay(1000);
+    queuePolicy.setMaximumRedeliveries(2);
+    activeMQConnectionFactory.setRedeliveryPolicy(queuePolicy);
+
+    Connection connection = activeMQConnectionFactory.createConnection();
+   ```
+
+6. 死信队列
+
+   - defualt all poison message in ActiveMQ.DLQ, can config by deadLetterQueue
+
+   ```xml
+   <deadLitterStrategy>
+       <sharedDeadLetterStrategy deadLetterQueue="DLQ-QUEUE"/>
+   </deadLitterStrategy>
+   ```
+
+   - custom specify DeadLetter
+
+   ```xml
+   <!-- Queue: ActiveMQ.DLQ.Queue -->
+   <!-- Topic: ActiveMQ.DLQ.Topic -->
+   <!--
+        <policyEntry queue="> ">
+        "> ": means apply it to all queue and topic
+    -->
+   <policyEntry queue="order">
+        <!-- specify queue ORDER: ActiveMQ.DLQ.Queue.Order -->
+        <deadLetterStrategy>
+            <!-- order is queue -->
+            <individualDeadLetterStrategy queuePrefix="DLQ." useQueueForQueueMessages="false"/>
+            <!-- order is topic: useQueueForTopicMessages defualt ois true, and it means store topic's DeadLetter in Queue -->
+            <individualDeadLetterStrategy topicPrefix="DLQ." useQueueForTopicMessages="true"/>
+        </deadLetterStrategy>
+   </policyEntry>
+   ```
+
+   - auto delete expire message: when need delete message other than send it to dead queue
+
+   ```xml
+   <policyEntry queue="order">
+        <deadLetterStrategy>
+            <!-- processExpired: default is true and means send expied message to dead queue -->
+            <sharedDeadLetterStrategy processExpired="false"/>
+        </deadLetterStrategy>
+   </policyEntry>
+   ```
+
+   - send non-persistence message to dead queue
+
+   ```xml
+    <!-- defualt mq will not send non-persistence to dead queue -->
+    <policyEntry queue="order">
+        <deadLetterStrategy>
+            <!-- processNonPersistence: default is false and means donnot send  non-persistence message to dead queue -->
+            <sharedDeadLetterStrategy processNonPersistence="true"/>
+        </deadLetterStrategy>
+   </policyEntry>
+   ```
+
+7. 保证消息不被重复消费[幂等性]
+   - 网络延迟传输过程中, 会造成 MQ 的消息重试过程中的重复消费
+   - solution
+     1. 如果消息会插入数据库数据, 给消息一个唯一的主键, 重复消费会导致错误.
+     2. 引入 redis, 给消息分配一个全局的 ID, 消费过的消息以 k-v 存入, 每次读取之前都先查一下 redis.

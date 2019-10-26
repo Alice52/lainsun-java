@@ -1,6 +1,16 @@
 ## spring
 
-### spring modules
+### introduce
+
+#### spring feature
+
+- definition: Spring 是一个 IOC(DI) 和 AOP 容器的开源的为简化企业级开发框架
+- feature
+  - 非侵入式: 不依赖于 Spring 的 API(轻量级)
+  - 依赖注入: DI(`Dependency Injection`), 反转控制(IOC)最经典的实现
+  - 面向切面编程: AOP(`Aspect Oriented Programming`)
+  - 容器: Spring 是一个容器, 包含管理应用对象的生命周期
+  - 组件化: Spring 实现了使用简单的组件配置组合成一个复杂的应用. 在 Spring 中可以使用 XML 和 Java 注解组合这些对象
 
 #### overview
 
@@ -13,6 +23,6 @@
 - integration: remoting, jms, jca, jmx, email, tasks, scheduling, caching.
 - languages:kotlin, groovy, dynamic languages.
 
-#### schematic diagram
+#### spring modules schematic diagram
 
 ![avatar](/static/image/spring/spring-module.png)
