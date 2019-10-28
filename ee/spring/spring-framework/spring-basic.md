@@ -300,6 +300,92 @@ public class PersonFactoryBean implements FactoryBean<Person> {
 
 ---
 
+### AOP
+
+#### AOP Before
+
+- demand
+
+  ```java
+  private static final Logger LOG = LoggerFactory.getLogger(ArithmeticCalculator.class);
+
+  @Override
+  public int add(int a, int b) {
+      LOG.info("The method add begins with [" + a + ", " + b + "]");
+      int result = a + b;
+      LOG.info("The method add ends with [" + result + "]");
+      return result;
+  }
+
+  @Override
+  public int sub(int a, int b) {
+      LOG.info("The method sub begins with [" + a + ", " + b + "]");
+      int result = a - b;
+      LOG.info("The method sub ends with [" + result + "]");
+      return result;
+  }
+
+  @Override
+  public int mul(int a, int b) {
+      LOG.info("The method mul begins with [" + a + ", " + b + "]");
+      int result = a * b;
+      LOG.info("The method mul ends with [" + result + "]");
+      return result;
+  }
+
+  @Override
+  public int div(int a, int b) {
+      LOG.info("The method div begins with [" + a + ", " + b + "]");
+      int result = a / b;
+      LOG.info("The method div ends with [" + result + "]");
+      return result;
+  }
+  ```
+
+- proxy:
+
+  ```java
+  原理:
+    使用一个代理将对象包装起来, 然后用该代理对象取代原始对象. 任何对原始对象的调用都要通过代理. 代理对象决定是否以及何时将方法调用转到原始对象上
+
+  type:
+    1. based on Interface: JDK
+    2. based on Inhert: Cglib, Javassist
+
+  code:
+    private static final Logger LOG = LoggerFactory.getLogger(ArithmeticCalculatorProxy.class);
+
+    private ArithmeticCalculator targetCalculator;
+
+    public ArithmeticCalculatorProxy(ArithmeticCalculator calculator) {
+        this.targetCalculator = calculator;
+    }
+
+    public Object getProxy() {
+
+        // for proxy object load
+        ClassLoader loader = targetCalculator.getClass().getClassLoader();
+        // tell me what function the proxy object have, and make sure proxy and target expose same method. And it is the reason od CAST proxy to ArithmeticCalculator
+        Class<?>[] interfaces = targetCalculator.getClass().getInterfaces();
+        Object proxyObject =
+            Proxy.newProxyInstance(
+                loader,
+                interfaces,
+                (proxy, method, args) -> {
+                // proxy is the proxy object, but fewer use
+                LOG.info("The method {} begins with {}", method.getName(), Arrays.asList(args));
+                Object result = method.invoke(targetCalculator, args);
+                LOG.info("The method {} ends with [{}]", method.getName(), result);
+                return result;
+                });
+
+        return proxyObject;
+    }
+  ```
+
+- diagram
+  ![avatar](/static/image/spring/aop-proxy.png)
+
 ## Question
 
 1. datasource.properties error
