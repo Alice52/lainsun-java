@@ -5,6 +5,7 @@
     <property name="LOG_HOME" value="./log"/>
     <property name="APP_NAME" value="spring-data-jpa"/>
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS}  [%thread] [%X{ThreadID}] %-5level [%logger{50}.%M:%L] - %msg%n"/>
+    <!-- <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS}  [%thread] [%X{ThreadID}] %-5level [%logger{50}] - %msg%n"/> -->
 
     <!--控制台日志,  控制台输出 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -89,7 +90,7 @@
             <MaxFileSize>10MB</MaxFileSize>
         </triggeringPolicy>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>ERROR</level>
+            <level>WARN</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>

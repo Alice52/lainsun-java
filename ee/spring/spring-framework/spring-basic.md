@@ -386,6 +386,63 @@ public class PersonFactoryBean implements FactoryBean<Person> {
 - diagram
   ![avatar](/static/image/spring/aop-proxy.png)
 
+#### AOP
+
+1. definition
+   - 横切关注点: 从每个方法中抽取出来的同一类非核心业务
+   - 切面(Aspect): 封装横切关注点信息的类, 每个关注点体现为一个通知方法
+   - 通知(Advice): 切面必须要完成的各个具体工作
+   - 目标(Target): 被通知的对象
+   - 代理(Proxy): 向目标对象应用通知之后创建的代理对象
+   - 连接点(Joinpoint): 横切关注点在程序代码中的具体体现, 对应程序执行的某个特定位置
+   - 切入点(pointcut): 定位连接点的方式. `如果把连接点看作数据库中的记录, 那么切入点就是查询条件`
+
+![avatar](/static/image/spring/aop.png)
+
+2. AspectJ more performance than spring AOP
+
+   - enable annotation AspectJ: **`为切面中通知能作用到的目标类生成代理`**
+
+   ```xml
+    <!-- enable aspectj with annotation: generate proxy for Aspect's Advice-->
+   <aop:aspectj-autoproxy/>
+
+   <!-- DEPENDENCY -->
+   <dependency>
+       <groupId>org.springframework</groupId>
+       <artifactId>spring-aop</artifactId>
+       <version>5.2.0.RELEASE</version>
+   </dependency>
+   <dependency>
+       <groupId>org.aspectj</groupId>
+       <artifactId>aspectjrt</artifactId>
+       <version>1.9.4</version>
+   </dependency>
+   ```
+
+   - AspectJ Type
+
+   ```markdown
+   1. @Before: 前置通知, 在方法执行之前执行
+   2. @After: 后置通知, 在方法执行之后执行. `永远都会执行`
+   3. @AfterRunning: 返回通知, 在方法返回结果之后执行
+   4. @AfterThrowing: 异常通知, 在方法抛出异常之后执行
+   5. @Around: 环绕通知, 围绕着方法执行
+   ```
+
+---
+
+## Issue
+
+1. Test use @Autowire
+   ```java
+   // add spring-test dependency
+   @RunWith(SpringJUnit4ClassRunner.class)
+   @ContextConfiguration("classpath:ApplicationContext.xml")
+   ```
+
+---
+
 ## Question
 
 1. datasource.properties error
