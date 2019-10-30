@@ -401,10 +401,40 @@ public class PersonFactoryBean implements FactoryBean<Person> {
 
 2. AspectJ more performance than spring AOP
 
-   - enable annotation AspectJ: **`为切面中通知能作用到的目标类生成代理`**
+- AspectJ Type
+
+```markdown
+1. @Before: 前置通知, 在方法执行之前执行. 不能获取结果
+2. @After: 后置通知, 在方法执行之后执行. `永远都会执行`, 不能获取结果
+3. @AfterRunning: 返回通知, 在方法返回结果之后执行, 可以获取结果
+4. @AfterThrowing: 异常通知, 在方法抛出异常之后执行. 可以指定异常
+5. @Around: 环绕通知, 围绕着方法执行
+```
+
+3. usage
+
+   - xml
 
    ```xml
-    <!-- enable aspectj with annotation: generate proxy for Aspect's Advice-->
+   <aop:config>
+       <aop:aspect ref="loggingAspect" order="2">
+           <aop:pointcut id="pointcut" expression="execution(* cn.edu.ntu.spring.aop.before.proxy.*.*(..))"/>
+
+           <aop:before method="preAdvice" pointcut-ref="pointcut"/>
+           <aop:after method="postAdvice" pointcut-ref="pointcut"/>
+           <aop:after-returning method="reAdvice" pointcut-ref="pointcut" returning="result"/>
+           <aop:after-throwing method="throwingAdvice" pointcut-ref="pointcut" throwing="ex"/>
+
+           <aop:around method="aroundAdvice" pointcut-ref="pointcut"/>
+       </aop:aspect>
+   </aop:config>
+   ```
+
+   - Annotation
+
+   ```xml
+   <!-- enable annotation AspectJ: **`为切面中通知能作用到的目标类生成代理`** -->
+   <!-- enable aspectj with annotation: generate proxy for Aspect's Advice-->
    <aop:aspectj-autoproxy/>
 
    <!-- DEPENDENCY -->
@@ -420,14 +450,28 @@ public class PersonFactoryBean implements FactoryBean<Person> {
    </dependency>
    ```
 
-   - AspectJ Type
+   ```java
+   @Pointcut(value = "execution(* cn.edu.ntu.spring.aop.before.proxy.*.*(..))")
+   public void pointCut() {}
 
-   ```markdown
-   1. @Before: 前置通知, 在方法执行之前执行
-   2. @After: 后置通知, 在方法执行之后执行. `永远都会执行`
-   3. @AfterRunning: 返回通知, 在方法返回结果之后执行
-   4. @AfterThrowing: 异常通知, 在方法抛出异常之后执行
-   5. @Around: 环绕通知, 围绕着方法执行
+   @Before("pointCut()")
+   public void preAdvice(JoinPoint joinPoint) {
+       String methodName = joinPoint.getSignature().getName();
+       Logger LOG = AspectUtil.getTargetLogger(this.LOGGER, joinPoint);
+
+       LOG.info(
+           "Before Advice, exec method {} with args {}",
+           methodName,
+           getTargetArgs(joinPoint, methodName));
+   }
+
+   @AfterReturning(value = "pointCut()", returning = "result")
+   public void reAdvice(JoinPoint joinPoint, Object result) {
+       Logger LOG = AspectUtil.getTargetLogger(this.LOGGER, joinPoint);
+       String methodName = joinPoint.getSignature().getName();
+
+       LOG.info("Return Advice, exec method {} end and result is {}", methodName, result);
+   }
    ```
 
 ---
