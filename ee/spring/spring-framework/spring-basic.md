@@ -401,15 +401,15 @@ public class PersonFactoryBean implements FactoryBean<Person> {
 
 2. AspectJ more performance than spring AOP
 
-- AspectJ Type
+   - AspectJ Type
 
-```markdown
-1. @Before: 前置通知, 在方法执行之前执行. 不能获取结果
-2. @After: 后置通知, 在方法执行之后执行. `永远都会执行`, 不能获取结果
-3. @AfterRunning: 返回通知, 在方法返回结果之后执行, 可以获取结果
-4. @AfterThrowing: 异常通知, 在方法抛出异常之后执行. 可以指定异常
-5. @Around: 环绕通知, 围绕着方法执行
-```
+   ```markdown
+   1. @Before: 前置通知, 在方法执行之前执行. 不能获取结果
+   2. @After: 后置通知, 在方法执行之后执行. `永远都会执行`, 不能获取结果
+   3. @AfterRunning: 返回通知, 在方法返回结果之后执行, 可以获取结果
+   4. @AfterThrowing: 异常通知, 在方法抛出异常之后执行. 可以指定异常
+   5. @Around: 环绕通知, 围绕着方法执行
+   ```
 
 3. usage
 
@@ -473,6 +473,139 @@ public class PersonFactoryBean implements FactoryBean<Person> {
        LOG.info("Return Advice, exec method {} end and result is {}", methodName, result);
    }
    ```
+
+### JdbcTemplate
+
+1. COMMON API
+
+   - JdbcTemplate.update(String, Object...)
+   - JdbcTemplate.batchUpdate(String, List<Object[]>): no transaction
+   - JdbcTemplate.queryForObject(String, RowMapper<Department>, Object...)
+   - JdbcTemplate.query(String, RowMapper<Department>, Object...)
+   - JdbcTemplate.queryForObject(String, Class, Object...)
+
+2. NamedParameterJdbcTemplate
+
+   ```xml
+   <!-- INSERT INTO depts (dept_name) VALUES (:deptName) -->
+   <bean id="namedTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+       <constructor-arg ref="dataSource"/>
+   </bean>
+
+   <!-- NamedParameterJdbcTemplate.update(String sql, Map<String, ?> map) -->
+   ```
+
+   ```java
+    String sql = "insert into demo_user(name, age, birthDay, email, salary) values(:name,:age,:birthDay,:email, :salary)";
+
+    Person person = new Person();
+    person.setAge(20);
+    person.setBirthDay(new Date());
+    person.setEmail("zzhang_xz@163.com");
+    person.setName("zack" + UUID.randomUUID().toString());
+    person.setGender(true);
+    person.setSalary(100.00);
+    SqlParameterSource parameterSource = new BeanPropertySqlParameterSource(person);
+    namedParameterJdbcTemplate.update(sql, parameterSource);
+   ```
+
+### Transaction
+
+1. souce code: impliment based on AOP
+
+- spring will genrate proxy for class using @Transactional annotation
+- then spring will contribute the method labled @Transactional to work as transaction
+
+2. config
+
+   - annotation
+
+   ```xml
+   <bean id="jpaTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+       <property name="entityManagerFactory" ref="entityManagerFactory"></property>
+   </bean>
+
+   <!--enabel trasaction annotation: @Transactional -->
+   <tx:annotation-driven transaction-manager="jpaTransactionManager"/>
+
+   @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true, timeout = 3, isolation = Isolation.READ_COMMITTED, rollbackFor = {ClassNotFoundException.class})
+   ```
+
+   - xml
+
+   ```xml
+   <aop:config>
+       <aop:pointcut id="txPointCut" expression="execution(* com.atguigu.tx.component.service.BookShopServiceImpl.purchase(..))"/>
+       <!-- Association -->
+       <aop:advisor advice-ref="myTx" pointcut-ref="txPointCut"/>
+   </aop:config>
+
+   <!-- config xml transaction  -->
+   <tx:advice id="myTx" transaction-manager="transactionManager">
+       <tx:attributes>
+           <!-- set transaction property -->
+           <tx:method name="find*" read-only="true"/>
+           <tx:method name="get*" read-only="true"/>
+           <tx:method name="purchase"  isolation="READ_COMMITTED"
+               no-rollback-for="java.lang.ArithmeticException, java.lang.NullPointerException"
+               propagation="REQUIRES_NEW"
+               read-only="false"
+               timeout="10"/>
+           <!-- other methods besides before -->
+           <tx:method name="*"/>
+       </tx:attributes>
+   </tx:advice>
+   ```
+
+3. @Transactional
+
+   - transaction propagation: the caller labeled @Transactionan call method labeled @Transactional
+
+     ```java
+     // default: use the caller transaction, big transaction
+     propagation = Propagation.REQUIRED
+     // use callee transaction, small transaction; callee will hang up caller transaction
+     propagation = Propagation.REQUIRES_NEW
+     ```
+
+   ![avatar](/static/image/spring/transaction-propagation.png)
+
+   - [transaction Isolation](/db/laguage/mysql/mysql-basical.md#7-transaction)
+
+     ```java
+     // 脏读: 一个事务读取到了另外一个事务未提交的数据.
+     // 不可重复读: 同一个事务中, 多次读取到的数据不一致.
+     // 幻读: 一个事务读取数据时, 另外一个事务进行更新, 导致第一个事务读取到了没有更新的数据.
+
+     // READ UNCOMMITTED
+     // READ COMMITTED  -- 可以避免脏读
+     // REPEATABLE READ -- 可以避免脏读、不可重复读和一部分幻读
+     // SERIALIZABLE -- 可以避免脏读、不可重复读和幻读
+
+     isolation = Isolation.READ_UNCOMMITTED
+     isolation = Isolation.READ_COMMITTED
+     isolation = Isolation.REPEATABLE_READ[DEFAULT]
+     isolation = Isolation.SERIALIZABLE
+     ```
+
+   - transaction rollback
+
+     ```java
+     // default: spring will rollback all transaction, which occurs RuntimeException.
+     rollbackFor = {EXCEPTION_NAME.class}
+     rollbackForClassName = {EXCEPTION_NAME}
+     noRollbackFor = {EXCEPTION_NAME.class}
+     noRollbackForClassName = {EXCEPTION_NAME}
+     ```
+
+   - transaction readOnly: no update in db
+
+     ```java
+     readOnly = true
+     readOnly = false
+     ```
+
+   - transaction timeout: set time before execute rollback
 
 ---
 

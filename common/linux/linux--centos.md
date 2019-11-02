@@ -45,7 +45,7 @@ sudo yum install docker-ce
 # 4. start dcoker
 systemctl start docker
 # 配置镜像加速
-docker vim /etc/docker/daemon.json
+vim /etc/docker/daemon.json
 ########################################
 # {
 #   "registry-mirrors": ["https://wfjvo9ge.mirror.aliyuncs.com"]

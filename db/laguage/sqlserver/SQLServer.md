@@ -1,5 +1,7 @@
 ## [Ubuntu install SQLServer](https://docs.microsoft.com/zh-cn/sql/linux/quickstart-install-connect-ubuntu?view=sql-server-2017)
 
+- notice: require ubuntu 16.04[only]
+
 ```shell
 # 1. 导入公共存储库 GPG 密钥
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
@@ -12,7 +14,7 @@ sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubunt
 sudo apt-get update
 sudo apt-get install -y mssql-server
 
-# 4. 初始化实例, 配置密码
+# 4. 初始化实例, 配置密码, 选择 developver
 sudo /opt/mssql/bin/mssql-conf setup
 
 # 5. 查看服务状态

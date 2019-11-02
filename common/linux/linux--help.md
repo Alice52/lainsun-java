@@ -380,7 +380,7 @@ sudo systemctl status rc-local.service
 - 在 ~/.bash_aliases 文件下添加
   ```shell
   touch .bash_aliases # create
-  alias .="cd .."
+  alias cd.="cd .."
   alias ..="cd ../.."
   alias ...="cd ../../.."
   alias download="cd ~/Downloads"

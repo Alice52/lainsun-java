@@ -181,21 +181,23 @@ DROP TABLE [IF EXISTS] TBALENAME;
   - Implicit transactions: with no obvious sign of starting and ending the transaction[insert/update/delete]
   - Explicit transaction: with an obvious sign of starting and ending the transaction
 
-- 7.5 transaction isolation level
+- 7.5 avoid transaction concurrency
 
-  - 脏读: 一个事务读取到了另外一个事务未提交的数据.
-  - 不可重复读: 同一个事务中, 多次读取到的数据不一致.
-  - 幻读: 一个事务读取数据时, 另外一个事务进行更新, 导致第一个事务读取到了没有更新的数据.
-
-- 7.6 avoid transaction concurrency
   - set transaction isolation level
+
   ```sql
+  -- 脏读: 一个事务读取到了另外一个事务未提交的数据.
+  -- 不可重复读: 同一个事务中, 多次读取到的数据不一致.
+  -- 幻读: 一个事务读取数据时, 另外一个事务进行更新, 导致第一个事务读取到了没有更新的数据.
+
   READ UNCOMMITTED
   READ COMMITTED  -- 可以避免脏读
   REPEATABLE READ -- 可以避免脏读、不可重复读和一部分幻读
   SERIALIZABLE -- 可以避免脏读、不可重复读和幻读
   ```
+
   - set isolation level:
+
   ```sql
   -- 设置隔离级别：
   SET SESSION|GLOBAL TRANSACTION ISOLATION LEVEL 隔离级别名;
