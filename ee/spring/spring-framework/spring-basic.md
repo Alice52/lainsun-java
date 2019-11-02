@@ -513,8 +513,8 @@ public class PersonFactoryBean implements FactoryBean<Person> {
 
 1. souce code: impliment based on AOP
 
-- spring will genrate proxy for class using @Transactional annotation
-- then spring will contribute the method labled @Transactional to work as transaction
+   - spring will genrate proxy for class using @Transactional annotation
+   - then spring will contribute the method labled @Transactional to work as transaction
 
 2. config
 
