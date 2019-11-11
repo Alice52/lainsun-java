@@ -467,6 +467,46 @@
 
 ### Listener
 
+1. create spring IOC container
+2. java code: spring mvc impliment class[ContextLoaderListener]
+
+   ```java
+   public class CunstomerServletContextListener implements ServletContextListener {
+
+   @Override
+   // created when tomcat container startup
+   public void contextInitialized(ServletContextEvent sce) {
+       ApplicationContext ctx = new ClassPathXmlApplicationContext("ApplicationContext.xml");
+       ServletContext servletContext = sce.getServletContext();
+       servletContext.setAttribute("applicationContext", ctx);
+   }
+
+   @Override
+   public void contextDestroyed(ServletContextEvent sce) {}
+   }
+
+   /**
+   * @author zack
+   * @create 2019-11-11 21:23
+   * @function controller handler means servlet
+   */
+   public class CustomerServlet extends HttpServlet {
+
+   @Override
+   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+       throws ServletException, IOException {
+       ServletContext context = getServletContext();
+       ApplicationContext ctx = (ApplicationContext) context.getAttribute("applicationContext");
+   }
+
+   @Override
+   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+       throws ServletException, IOException {
+       super.doPost(req, resp);
+   }
+   }
+   ```
+
 ### Converter
 
 1. function: Data type conversion, data type formatting, data verification
@@ -490,7 +530,54 @@
    </bean>
    ```
 
-### Handler && Controller
+### HandlerInterceptor
+
+- java code
+
+```java
+@Component
+// execute sequence according to config sequence, same as Filter
+public class CustomerInterceptor implements HandlerInterceptor {
+
+  @Override
+  // from first to last
+  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+      throws Exception {
+    return false;
+  }
+
+  @Override
+  // from last to first
+  public void postHandle(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Object handler,
+      ModelAndView modelAndView)
+      throws Exception {}
+
+  @Override
+  // from last to first
+  public void afterCompletion(
+      HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+      throws Exception {}
+}
+```
+
+- comfig spring config.xml
+
+```xml
+ <mvc:interceptors>
+    <!-- intercept all request -->
+    <ref bean="custmInterceptor"/>
+
+    <!-- intercept specify request -->
+    <mvc:interceptor>
+        <mvc:mapping path="/users"/>
+        <mvc:exclude-mapping path="/list"/>
+        <ref bean="custmInterceptor"/>
+    </mvc:interceptor>
+</mvc:interceptors>
+```
 
 1. handlerMapping
 2. HandlerAdapter
@@ -687,11 +774,9 @@
      }
      ```
 
-### Sub-structure
-
-### LifeCycle
-
 ### Processing flows
+
+#### Quick Start
 
 1. start up application
 
@@ -707,6 +792,15 @@
    - @controller method will return result[json]
    - ViewResolver will get result and combine `physical view path: prefix + result + suffix`
    - forwaord to specify VIEW
+
+#### flow
+
+- request --> filter --> preHandler --> dispatcherServlet --> postHandler
+
+// TODO
+
+- diagram
+  ![avatar](/static/image/spring/spring-mvc-processor.png)
 
 ### Rest API
 
@@ -972,4 +1066,87 @@
   SimpleControlleraHandlerAdapter
   // RequestMappingHandlerAdapter replace AnnotationMethodHandlerAdapter
   RequestMappingHandlerAdapter
+  ```
+
+## 4. how to create spring IOC container
+
+- no web env
+  - create IOC container in mian or junit test
+- web env
+
+  - web application start up and create spring IOC container
+  - solution:
+
+  ```java
+  1. config listener to listen ServletContext Object
+  2. then create IOC container
+  3. bind IOC container to ServeletContext to share IOC container component
+  ```
+
+  - sample
+
+  ```xml
+  <!-- web.xml -->
+  <!-- enable spring IOC -->
+  <context-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath:ApplicationContext.xml</param-value>
+  </context-param>
+  <listener>
+      <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+  <!-- enable spring mvc IOC -->
+  <servlet>
+      <display-name>DispatcherServlet</display-name>
+      <servlet-name>MVCDispatcherServlet</servlet-name>
+      <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+      <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <!-- create container: param-name default: /WEB-INF/<servlet-name>-servlet.xml -->
+      <param-value>classpath*:Spring-mvc-applicaitionContext.xml</param-value>
+      </init-param>
+      <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+      <servlet-name>MVCDispatcherServlet</servlet-name>
+      <url-pattern>/*</url-pattern>
+  </servlet-mapping>
+  ```
+
+## 5. spring and spring mvc config
+
+- spring can config database, transaction etc
+  ```xml
+  <context:component-scan base-package="cn.edu.ntu.*">
+      <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+  </context:component-scan>
+  ```
+- spring mvc just manage @controller handler
+
+  ```xml
+  <context:component-scan base-package="cn.edu.ntu.*" use-default-filters="false">
+          <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+  </context:component-scan>
+  ```
+
+- in this case: spring IOC container is parent container, mvc IOC container is child container. So, child contianer can be access to parent container, but parent container cannot access to child contianner.
+
+- get applicationContext container
+
+  ```java
+  @RequestMapping(value = "/servlet/{Id}")
+  public JsonResult getContainerFServletContext(
+          HttpSession session) throws ServletException, IOException {
+
+      JsonResult result = new JsonResult();
+
+      ServletContext servletContext = session.getServletContext();
+
+      ApplicationContext ctx = (ApplicationContext) servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+      WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+
+      return result;
+  }
   ```
