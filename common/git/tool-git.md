@@ -174,7 +174,7 @@ git cherry-pick COMMIT_ID
 
   # 退出之后, 删除不要的 commit message
   # cannot merge [conflict]
-  git pull origin master
+  # git pull origin master
   # fix conflict
   git push -f
   ```
