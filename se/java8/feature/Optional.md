@@ -1,4 +1,4 @@
-## 简介
+### introduce
 
 - Optional<T> 类(java.util.Optional) 是一个容器类, 代表一个值存在或不存在, 原来用 null 表示一个值不存在, 现在 Optional 可以更好的表达这个概念. 并且可以避免空指针异常.
 - 常用方法
@@ -52,7 +52,7 @@
 
 ### map(Function<? super T, ? extends U> mapper) and flatMap(Function<? super T, Optional<U>> mapper)
 
-- map
+- map: envople result with Optional
 
   ```java
   public class User {
@@ -65,7 +65,7 @@
   String city = Optional.ofNullable(user).map(u-> u.getName()).get();
   ```
 
-- flatMap
+- flatMap: no envople result with Optional, and just return R
 
   ```java
   public class User {
