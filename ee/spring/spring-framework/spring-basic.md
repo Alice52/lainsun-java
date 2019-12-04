@@ -153,56 +153,128 @@ public class PersonFactoryBean implements FactoryBean<Person> {
 
 6. Bean Lifecycle
 
-   - create bean by `BeanFactory`
-   - set property for bean
-   - pass bean to postProcessBeforeInitialization
-   - bean init method
-   - pass bean to postProcessAfterInitialization
-   - `use bean`
-   - bean destroy method
+- 6.1 simple lifecycle
 
-   ```java
-   public class CustomBeanPostProcessor implements BeanPostProcessor {
-       private static final Logger LOG = LoggerFactory.getLogger(BeanLifecycle.class);
+  - create bean by `BeanFactory`
+  - set property for bean
+  - pass bean to postProcessBeforeInitialization
+  - bean init method
+  - pass bean to postProcessAfterInitialization
+  - `use bean`
+  - bean destroy method
 
-       /**
-       * @param bean
-       * @param beanName
-       * @return bean
-       * @throws BeansException
-       * @function do property validate
-       */
-       @Override
-       public Object postProcessBeforeInitialization(Object bean, String beanName)
-           throws BeansException {
+  ```java
+  public class CustomBeanPostProcessor implements BeanPostProcessor {
+      private static final Logger LOG = LoggerFactory.getLogger(BeanLifecycle.class);
 
-           Optional.ofNullable(beanName)
-               .filter(name -> name.equals("person4LifeCycle"))
-               .ifPresent(
-                   name ->
-                       LOG.info("bean lifecycle: step3: pass bean to postProcessBeforeInitialization"));
+      /**
+      * @param bean
+      * @param beanName
+      * @return bean
+      * @throws BeansException
+      * @function do property validate
+      */
+      @Override
+      public Object postProcessBeforeInitialization(Object bean, String beanName)
+          throws BeansException {
 
-           return bean;
-       }
+          Optional.ofNullable(beanName)
+              .filter(name -> name.equals("person4LifeCycle"))
+              .ifPresent(
+                  name ->
+                      LOG.info("bean lifecycle: step3: pass bean to postProcessBeforeInitialization"));
 
-           /**
-           * @param bean
-           * @param beanName
-           * @return bean
-           * @throws BeansException
-           * @function validate init method whether work
-           */
-       @Override
-       public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+          return bean;
+      }
 
-           Optional.ofNullable(beanName)
-               .filter(name -> name.equals("person4LifeCycle"))
-               .ifPresent(
-                   name -> LOG.info("bean lifecycle: step5: pass bean to postProcessAfterInitialization"));
-           return bean;
-       }
-   }
-   ```
+          /**
+          * @param bean
+          * @param beanName
+          * @return bean
+          * @throws BeansException
+          * @function validate init method whether work
+          */
+      @Override
+      public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+
+          Optional.ofNullable(beanName)
+              .filter(name -> name.equals("person4LifeCycle"))
+              .ifPresent(
+                  name -> LOG.info("bean lifecycle: step5: pass bean to postProcessAfterInitialization"));
+          return bean;
+      }
+  }
+  ```
+
+- 6.2 processor of create bean
+
+  ```java
+  // 1. create IOC container
+  new ClassPathXmlApplicationContext("ApplicationContext.xml");
+
+  // main processor
+  public ClassPathXmlApplicationContext(String[] configLocations, boolean refresh, @Nullable ApplicationContext parent) throws BeansException {
+      // 2.1 AbstractApplicationContext: label this class is IOC container class and resource class[ResourceLoader]
+      super(parent);
+      // 2.2 AbstractRefreshableConfigApplicationContext: get Bean resource location
+      this.setConfigLocations(configLocations);
+      if (refresh) {
+          // 2.3 important
+          this.refresh();
+      }
+  }
+
+  // 2.3.1 容器刷新前的准备，设置上下文状态，获取属性，验证必要的属性等
+  this.prepareRefresh();
+  // 2.3.2 获取新的beanFactory，销毁原有beanFactory、为每个bean生成BeanDefinition等
+  ConfigurableListableBeanFactory beanFactory = this.obtainFreshBeanFactory();
+  // 2.3.2.0 初始化读取器
+  initBeanDefinitionReader()
+  // 2.3.2.1 读取器加载Bean
+  loadBeanDefinitions()
+  // 2.3.2.2 return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
+  // 2.3.2.3 Register each bean definition within the given root {@code <beans/>} element
+  doRegisterBeanDefinitions(doc.getDocumentElement());
+  ...
+  // 2.3.3 配置标准的beanFactory，设置ClassLoader，设置SpEL表达式解析器，添加忽略注入的接口，添加bean，添加bean后置处理器等
+  prepareBeanFactory(beanFactory);
+
+  //2.3.4 模板方法，此时，所有的beanDefinition已经加载，但是还没有实例化: 允许在子类中对beanFactory进行扩展处理。比如添加ware相关接口自动装配设置，添加后置处理器等，是子类扩展prepareBeanFactory(beanFactory)的方法
+  postProcessBeanFactory(beanFactory);
+
+  // 2.3.5 实例化并调用所有注册的beanFactory后置处理器（实现接口BeanFactoryPostProcessor的bean，在beanFactory标准初始化之后执行）。
+  invokeBeanFactoryPostProcessors(beanFactory);
+
+  // 2.3.6 实例化和注册beanFactory中扩展了BeanPostProcessor的bean。
+  registerBeanPostProcessors(beanFactory);
+
+  // 2.3.7 初始化国际化工具类MessageSource
+  initMessageSource();
+
+  // 2.3.8 初始化事件广播器
+  initApplicationEventMulticaster();
+
+  // 2.3.9 模板方法，在容器刷新的时候可以自定义逻辑，不同的Spring容器做不同的事
+  onRefresh();
+
+  // 2.3.10 注册监听器，广播early application events
+  registerListeners();
+
+  // 2.3.11 实例化所有剩余的（非懒加载）单例: 实例化的过程各种BeanPostProcessor开始起作用。
+  finishBeanFactoryInitialization(beanFactory);
+  // 2.3.11.1 beanFactory.preInstantiateSingletons();
+  // 2.3.11.2  getBean(beanName);
+  // 2.3.11.3 Object beanInstance = doCreateBean(beanName, mbdToUse, args);
+  // 2.3.11.4 instanceWrapper = createBeanInstance(beanName, mbd, args);
+  // 2.3.11.5 beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, parent);  // call mo-args constructor
+  // 2.3.11.6 populateBean(beanName, mbd, instanceWrapper);
+  // 2.3.11.7 applyPropertyValues(beanName, mbd, bw, pvs);
+  // 2.3.11.8 bw.setPropertyValues(new MutablePropertyValues(deepCopy));  // call property setXx method
+  // 2.3.11.9 exposedObject = initializeBean(beanName, exposedObject, mbd); // now it full object
+
+  // 2.3.12 refresh做完之后需要做的其他事情: 清除上下文资源缓存（如扫描中的ASM元数据）初始化上下文的生命周期处理器，并刷新（找出Spring容器中实现了Lifecycle接口的bean并执行start()方法) .发布ContextRefreshedEvent事件告知对应的ApplicationListener进行响应的操作
+  finishRefresh();
+  ```
 
 7. connect to database
    ```xml

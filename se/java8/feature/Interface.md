@@ -51,18 +51,18 @@ interface A {
 }
 }
 interface B {
-	default String say(String name) {
-		return "hi " + name;
-	}
+    default String say(String name) {
+        return "hi " + name;
+    }
 }
 interface C extends A,B{
     // 这里编译就会报错: error: interface C inherits unrelated defaults for say(String) from types A and B
 }
 
 interface C extends A,B{
-	default String say(String name) {
-		return "greet " + name;
-	}
+    default String say(String name) {
+        return "greet " + name;
+    }
 }
 ```
 
@@ -177,14 +177,14 @@ interface C extends A2,B{
 
 ```java
 interface A1 {
-	default void say() {
-		System.out.println("A1");
-	}
+    default void say() {
+        System.out.println("A1");
+    }
 }
 interface A2 extends A1 {
-	default void say() {
-		System.out.println("A2");
-	}
+    default void say() {
+        System.out.println("A2");
+    }
 }
 interface C extends A2,A1{
 
@@ -193,8 +193,8 @@ static class D implements C {
 
 }
 public static void main(String[] args) {
-	D d = new D();
-	d.say(); // A2
+    D d = new D();
+    d.say(); // A2
 }
 ```
 
@@ -215,26 +215,28 @@ public static void main(String[] args) {
 
 ```java
 interface A {
-	default void say() {
-		System.out.println("A");
-	}
+    default void say() {
+        System.out.println("A");
+    }
 }
 static class B {
-	public void say() {
-		System.out.println("B");
-	}
+    public void say() {
+        System.out.println("B");
+    }
 }
 static class C extends B implements A{
 
 }
 public static void main(String[] args) {
-	C c = new C();
-	c.say(); //B
+    C c = new C();
+    c.say(); //B
 }
 ```
 
 ### 结论
 
+- class always win, sub-interface win,
+- implements is always sub-class have high prior
 - 类优先于接口. `如果一个子类继承的父类和接口有相同的方法实现. 那么子类继承父类的方法`
 - `子类型中的方法优先于父类型中的方法[就近原则]`
 - 如果以上条件都不满足, 则必须显示覆盖/实现其方法, 或者声明成 abstract.
