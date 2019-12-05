@@ -1,8 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-**Table of Contents** _generated with [DocToc](https://github.com/thlorenz/doctoc)_
-
 - [nginx](#nginx)
   - [introduce](#introduce)
   - [nginx 安装](#nginx-%E5%AE%89%E8%A3%85)
@@ -101,6 +96,11 @@
 
 - diagram
   ![avatar](/static/image/nginx/nginx-conf.png)
+- /usr/sbin/nginx：主程序
+- /etc/nginx：存放配置文件
+- /usr/share/nginx：存放静态文件
+- /var/log/nginx：存放日志
+
 - global var: 影响 nginx 服务器整体运行的配置指令
   - nginx 服务器的用户(组)
   - worker process 数: worker_processes 值越大, 并发处理量也越多, 但是
@@ -157,6 +157,24 @@
   3. ~\*: 用于表示 uri 包含正则表达式, 并且不区分大小写.
   4. ^~: 用于不含正则表达式的 uri 前, 要求 Nginx 服务器找到标识 uri 和请求字符串匹配度最高的 location 后, 立即使用此 location 处理请求, 而不再使用 location 块中的正则 uri 和请求字符串做匹配.
 - 注意: 如果 uri 包含正则表达式, 则必须要有 ~ 或者 ~\* 标识.
+
+- demo
+  ```conf
+  cp nginx.conf nginx.conf.backup
+  vim nginx.conf
+  // do some changes
+  user root;
+  server {
+      listen    81; #  listen [::]:81 default_server;
+      server_name 101.132.45.28;
+      location /image/ {
+          root  /usr/local/myImage/;
+          autoindex on;
+      }
+  }
+  // 说明: 这里的访问路径为 101.132.45.28:81/image/xxxx.jpg
+  // 文件存储路径为: /usr/local/myImage/image/xxxx.jpg.
+  ```
 
 ### common comand
 

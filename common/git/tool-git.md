@@ -147,6 +147,19 @@ git cherry-pick COMMIT_ID
   # 填写 COMMIT
   ```
 
+- rebase 其他分支
+
+  ```shell
+  # develop: O - A || feat-zack: O - B
+  git rebase origin develop
+  # fix conflict
+  git rebase --continue
+  # develop: O - A || feat-zack: O - A - B
+  # now can MR to develop
+  # meger feat-zack to develop
+  # develop: O - A -B || feat-zack: O - A - B
+  ```
+
 - 合并连续 COMMIT
 
   ```shell
