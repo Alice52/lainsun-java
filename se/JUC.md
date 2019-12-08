@@ -1,3 +1,5 @@
+## [Thread](./Thread.md)
+
 ## thead and process
 
 1. definition
@@ -47,7 +49,7 @@
            new Thread(() -> {for (int i = 1; i < 400; i++) tickets.sale();}, "seller04").start();
        }
    }
-       // resources = instance var + instance method
+   // resources = instance var + instance method
    class Ticket {
        private static final Logger LOG = LoggerFactory.getLogger(Ticket.class);
        private int number = 300;
@@ -55,13 +57,8 @@
 
        public synchronized void sale() {
            lock.lock();
-           try {
-               if (number > 0) {
-                   LOG.info( Thread.currentThread().getName() + " sale ticket number: " + number-- + " ," + number + " tickets left.");
-               }
-           } finally {
-               lock.unlock();
-           }
+           LOG.info( Thread.currentThread().getName() + " sale ticket number: " + number-- + " ," + number + " tickets left.");
+           lock.unlock();
        }
    }
    ```
@@ -71,113 +68,136 @@
    ```java
    public class NotifyWait {
        public static void main(String[] args) {
-           NotifyWait notifyWait = new NotifyWait();
-           notifyWait.NoVirtualWake();
-           notifyWait.VirtualWake();
-       }
-
-       public void NoVirtualWake() {
-           ShareDataVersion1 data = new ShareDataVersion1();
-           increaseData(data, "increase-thread").start();
-           decreaseData(data, "decrease-thread").start();
-       }
-
-       public void VirtualWake() {
-           // handle with while to judge
-           ShareDataVersion1 data = new ShareDataVersion1();
-           increaseData(data, "increase-thread").start();
-           increaseData(data, "increase-thread2").start();
-
-           decreaseData(data, "decrease-thread").start();
-           decreaseData(data, "decrease-thread2").start();
-       }
-
-       private Thread increaseData(ShareDataVersion1 data, String threadName) {
-           return new Thread(() -> { for (int i = 0; i < 500; i++) data.increase(); }, threadName);
-       }
-
-       private Thread decreaseData(ShareDataVersion1 data, String threadName) {
-           return new Thread(() -> { for (int i = 0; i < 500; i++)  data.decrease(); }, threadName);
+           ShareDataVersion data = new ShareDataVersion();
+           new Thread(() -> { for (int i = 0; i < 500; i++) data.increase(); }, "A").start();
+           new Thread(() -> { for (int i = 0; i < 500; i++)  data.decrease(); }, "B").start();
        }
    }
 
-   class ShareDataVersion1 {
-       private int number = 0;
-       private static final Logger LOG = LoggerFactory.getLogger(ShareDataVersion1.class);
-
-       public synchronized void increase() {
-           try {
-               // 2.1 judge
-               while (number != 0) { //      if (number != 0) {
-                   this.wait();
-               }
-               // 2.2 work
-               ++number;
-               LOG.info(
-                   Thread.currentThread().getName() + " increase shareData finished, number: " + number);
-               // 2.3 notify
-               this.notifyAll();
-           } catch (Exception e) {
-               LOG.error("increase failed");
-           }
-       }
-
-       public synchronized void decrease() {
-           try {
-               // 2.1 judge
-               while (number != 1) { //      if (number != 1) {
-                   this.wait();
-               }
-               // 2.2 work
-               --number;
-               LOG.info(
-                   Thread.currentThread().getName() + " decrease shareData finished, number: " + number);
-               // 2.3 notify
-               this.notifyAll();
-           } catch (Exception e) {
-               LOG.error("increase failed");
-           }
-       }
-   }
-
-   class ShareDataVersion2 {
+   class ShareDataVersion {
        private int number = 0;
        private Lock lock = new ReentrantLock();
        private Condition condition = lock.newCondition();
-       private static final Logger LOG = LoggerFactory.getLogger(ShareDataVersion1.class);
+       private static final Logger LOG = LoggerFactory.getLogger(ShareDataVersion.class);
 
-       public void increase() {
-           lock.lock();
-           try {
-               while (number != 0) {
-                   condition.wait();
-               }
+       public synchronized void increase() {
+               // 2.1 judge
+               while (number != 0) // if (number != 0) {
+                   this.wait();
+               // 2.2 work
                ++number;
-               LOG.info(
-                   Thread.currentThread().getName() + " increase shareData finished, number: " + number);
+               LOG.info(Thread.currentThread().getName() + " increase shareData finished, number: " + number);
+               // 2.3 notify
                this.notifyAll();
-           } catch (Exception e) {
-               LOG.error("increase failed");
-           } finally {
-               lock.unlock();
-           }
        }
 
        public void decrease() {
            lock.lock();
-           try {
-               while (number != 1) {
-                   this.wait();
-               }
-               --number;
-               LOG.info(
-                   Thread.currentThread().getName() + " decrease shareData finished, number: " + number);
-               // 2.3 notify
-               condition.signalAll();
-           } catch (Exception e) {
-               LOG.error("increase failed");
-           } finally {
-               lock.unlock();
+           while (number != 1)
+               this.wait();
+           --number;
+           LOG.info(Thread.currentThread().getName() + " decrease shareData finished, number: " + number);
+           condition.signalAll();
+           lock.unlock();
+       }
+   }
+   ```
+
+   - many thread sequence execute
+
+   ```java
+   public class ThreadOrderAccess {
+       public static void main(String[] args) {
+           ShareResource data = new ShareResource();
+           new Thread(() -> {for (int i = 1; i <= 10; i++) data.executeA(i); }, "A").start();
+           new Thread(() -> {for (int i = 1; i <= 10; i++) data.executeB(i); }, "B").start();
+           new Thread(() -> {for (int i = 1; i <= 10; i++) data.executeC(i); }, "C").start();
+       }
+   }
+
+   class ShareResource {
+       private static final Logger LOG = LoggerFactory.getLogger(ShareResource.class);
+       private int flag = 1; // flag: A-1; B-2; C-3;
+       private Lock lock = new ReentrantLock();
+       // like key of lock
+       private Condition conditionA = lock.newCondition();
+       private Condition conditionB = lock.newCondition();
+       private Condition conditionC = lock.newCondition();
+
+       public void executeA(int loopTimes) {
+           lock.lock();
+           while ( flag != 1)
+               conditionA.await();
+
+           LOG.info(Thread.currentThread().getName() + " execute " + loopTimes +" times");
+
+           flag = 2;
+           conditionB.signal();
+           lock.unlock();
+       }
+
+       public void executeB(int loopTimes) {
+           lock.lock();
+           while ( flag != 2)
+               conditionB.await();
+
+           LOG.info(Thread.currentThread().getName() + " execute " + loopTimes +" times");
+           flag = 3;
+           conditionC.signal();
+           lock.unlock();
+       }
+
+       public void executeC(int loopTimes) {
+           lock.lock();
+           while ( flag != 3)
+               conditionC.await();
+
+           LOG.info(Thread.currentThread().getName() + " execute " + loopTimes +" times");
+           flag = 1;
+           conditionA.signal();
+           lock.unlock();
+       }
+   }
+   ```
+
+   - thread condition: reduce, threads call sequence[others thead finished work, then execute specify thread]
+
+   ```java
+   public static void main(String[] args) {
+       int count = 20;
+       CountDownLatch cdl = new CountDownLatch(count);
+       for (int i = 0; i < count; i++) {
+       new Thread(
+           () -> {
+               LOG.info(Thread.currentThread().getName() + " leave room.");
+               cdl.countDown();
+           },
+           String.valueOf(i)).start();
+       }
+       cdl.await();
+       LOG.info("no person in room, can close door!");
+   }
+   ```
+
+   - thread condition: plus, when all thread reached barrier, can execute specify thread
+
+   ```java
+   public class CyclicBarrierDemo {
+
+       private static final int NUMBER = 10;
+       private static final Logger LOG = LoggerFactory.getLogger(CyclicBarrierDemo.class);
+
+       public static void main(String[] args) {
+           CyclicBarrier cb = new CyclicBarrier(NUMBER, () -> LOG.info("all things is ok, open barrier!"));
+
+           for (int i = 0; i < NUMBER; i++) {
+           final int times = i;
+           new Thread(
+               () -> {
+                    LOG.info(Thread.currentThread().getName() + " on condition, and will await for open barrier, and now have " + times + " in wait.");
+                    cb.await();
+               },
+               String.valueOf(i)).start();
            }
        }
    }
@@ -196,4 +216,265 @@
    - 两个资源类， 两个同步方法，则两个线程分别使用不同的资源类导致不是同一把锁，所以彼此互不相关
    - 两个静态同步方法， 无论资源个数， 都会按调用的顺序执行 `[static 所得是类加载器中的模板，即所有这个类的实例]`
 
-## synchronization
+## read write lock
+
+1. 读锁可共享， 写锁必排他
+2. code
+
+   ```java
+   public class ReadWriteLock {
+       public static void main(String[] args) throws InterruptedException {
+           CustomQueue customQueue = new CustomQueue();
+           new Thread(() -> customQueue.writeObject("zack"), "WriteThread").start();
+           // sleep to make write first, then read thread will not read null value
+           TimeUnit.SECONDS.sleep(1);
+           for (int i = 0; i < 100; i++)
+               new Thread(() -> customQueue.readObject(), "ReadThread" + i).start();
+       }
+   }
+
+   class CustomQueue {
+       private static final Logger LOG = LoggerFactory.getLogger(CustomQueue.class);
+       private Object object;
+       private ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
+       public void writeObject(Object object) {
+           readWriteLock.writeLock().lock();
+           this.object = object;
+           LOG.info(Thread.currentThread().getName() + " write "+ object.toString());
+           readWriteLock.writeLock().unlock();
+       }
+
+       public void readObject() {
+           readWriteLock.readLock().lock();
+           LOG.info(Thread.currentThread().getName() + " read "+ this.object.toString());
+           readWriteLock.readLock().unlock();
+       }
+   }
+   ```
+
+## diff between lock and synchronized
+
+1. synchronized cannot guarantee sequence, all thread will have access to gain execution access
+2. lock ca make sequence, can **`signal specify thread`**
+
+## diff between Callable and Runnable
+
+- code
+
+```java
+public class CallableDemo {
+  private static final Logger LOG = LoggerFactory.getLogger(CallableDemo.class);
+
+  public static void main(String[] args) throws ExecutionException, InterruptedException {
+    FutureTask<Integer> future = new FutureTask<>(() -> {
+              TimeUnit.SECONDS.sleep(4);
+              return 200;
+            });
+
+    // call() will just execute one time, unless use many new FutureTask<>(new Callable() {});
+    new Thread(future, "Callable Thread1 implement").start();
+    new Thread(future, "Callable Thread2 implement").start();
+
+    LOG.info(Thread.currentThread().getName() + ": Main Thread execute");
+
+    Integer integer = future.get();
+    LOG.info("Callable Thread response: " + integer);
+  }
+}
+
+class RThread implements Runnable {
+  @Override
+  public void run() {}
+}
+
+class CThread implements Callable<Integer> {
+  @Override
+  public Integer call() throws Exception {
+    TimeUnit.SECONDS.sleep(4);
+    return 200;
+  }
+}
+```
+
+1. 泛型
+2. 返回值
+3. 方法名不同
+4. 异常抛出
+5. 异步回调[FutureTask]
+
+### FutureTask/Callable
+
+1. one `new FutureTask<>(new CThread())`, no matter how many thread, Callable call() method will just execute one time.
+2. FutureTask often used to calculate time consuming task
+3. thread method should be in last, when execute thread method will block main thread.
+4. use get() to get FutureTask result, if fisish calcutate, it will nerver recalculate and cannot be canceled
+5. if call get() method, calculate donot finish, the thread will be blocked until finish calculation
+
+## CountDownLatch
+
+1. let some threads block until they are finished, then can execute specify thread
+2. when call await() will block these threads
+3. call countDown() will reduce 1, util CountDownLatch value is zero and then will unblock threads
+
+4. code
+
+```java
+public static void main(String[] args) {
+    int count = 20;
+    CountDownLatch cdl = new CountDownLatch(count);
+    for (int i = 0; i < count; i++) {
+    new Thread(
+        () -> {
+            LOG.info(Thread.currentThread().getName() + " leave room.");
+            cdl.countDown();
+        },
+        String.valueOf(i)).start();
+    }
+    cdl.await();
+    LOG.info("no person in room, can close door!");
+}
+```
+
+## CyclicBarrier
+
+1. 可循环(Cyclic)的使用屏障(Barrier)
+2. 让一组线程达到一个屏障(同步点)时被阻塞， 直到最后一个达到屏障时， 屏障才会打开，所有的被阻塞的线程才会继续
+3. await() 可以使线程进入屏障
+4. code
+
+   ```java
+   public class CyclicBarrierDemo {
+
+       private static final int NUMBER = 10;
+       private static final Logger LOG = LoggerFactory.getLogger(CyclicBarrierDemo.class);
+
+       public static void main(String[] args) {
+           CyclicBarrier cb = new CyclicBarrier(NUMBER, () -> LOG.info("all things is ok, open barrier!"));
+
+           for (int i = 0; i < NUMBER; i++) {
+           final int times = i;
+           new Thread(
+               () -> {
+                    LOG.info(Thread.currentThread().getName() + " on condition, and will await for open barrier, and now have " + times + " in wait.");
+                    cb.await();
+               },
+               String.valueOf(i)).start();
+           }
+       }
+   }
+   ```
+
+## diff between CountDownLatch and CyclicBarrier
+
+1. CountDownLatch is reduce, `Everyone's gone to close door`
+2. CyclicBarrier is plus, `Only when people get together will they meet`
+
+## Semaphore
+
+1. first in first get
+2. leaved then others in
+3. like `get access to park; Eat hot pot in order`
+4. code
+
+   ```java
+   public class SemaphoreDemo {
+       private static final int PARK_NUMBER = 5;
+       private static final Logger LOG = LoggerFactory.getLogger(SemaphoreDemo.class);
+
+       public static void main(String[] args) {
+           // mockup park number
+           Semaphore semaphore = new Semaphore(PARK_NUMBER);
+
+           for (int i = 0; i < PARK_NUMBER * 2; i++) {
+           new Thread(
+               () -> {
+                   semaphore.acquire();
+                   LOG.info(Thread.currentThread().getName() + " get access to park");
+
+                   TimeUnit.SECONDS.sleep(new Random().nextInt(10)); // park random second, then leave
+                   LOG.info(Thread.currentThread().getName() + " leave park");
+               },
+               String.valueOf(i)).start();
+           }
+       }
+   }
+   ```
+
+## Executors
+
+1. the object got by new can use pool to get
+2. code
+
+   ```java
+   private static void scheduledExecutorPool() {
+       Future<Integer> result;
+       int poolSize = 5;
+       ScheduledExecutorService executor = Executors.newScheduledThreadPool(poolSize); // specify number thread in pool
+       ScheduledExecutorService singleExecutor = Executors.newSingleThreadScheduledExecutor(); // 1 thread in pool
+
+       try {
+           for (int i = 0; i < poolSize * 3; i++) {
+               result = executor.schedule( () ->  return new Random().nextInt(10), 5, TimeUnit.SECONDS);
+               LOG.info(Thread.currentThread().getName() + " result: " + result.get());
+           }
+       } finally {
+           executor.shutdown();
+       }
+   }
+
+   private static void executorPool() {
+       Future<Integer> result;
+       int poolSize = 5;
+       ExecutorService executor = Executors.newFixedThreadPool(poolSize); // specify number thread in pool
+       ExecutorService singleExecutor = Executors.newSingleThreadExecutor(); // 1 thread in pool
+       ExecutorService nExecutor = Executors.newCachedThreadPool(); // N thread in pool
+
+       try {
+           for (int i = 0; i < poolSize * 3; i++) {
+               result = executor.submit(() -> return new Random().nextInt(10));
+               LOG.info(Thread.currentThread().getName() + " result: " + result.get());
+           }
+       } finally {
+           executor.shutdown();
+       }
+   }
+   ```
+
+## not thread safe
+
+1. List: just if read and write in same time will occur ConcurrentModificationException
+
+   - CopyOnWrite 容器即写时赋值容器。 add(Element e) 时将当前容器进行 copy， 赋值出一个新的容器， 然后向新的容器内添加元素， 完成后将原来容器的引用指向新的容器
+   - feture: 可以对 CopyOnWrite 容器并发的读， 且不需要加锁， 因为当前容器不会添加值； CopyOnWrite 容器也是一种读写分离的思想， 读数据和写数据在不同的容器进行
+   - code
+
+   ```java
+   // not safe
+   public static void testUnSafedList() throws InterruptedException {
+       List<String> list = new ArrayList();
+       for (int i =0; i< 30; i++) {
+           new Thread(() -> {
+               list.add(UUID.randomUUID().toString());
+               System.out.println(list);  // write and read will occur ConcurrentModificationException
+           }).start();
+       }
+       TimeUnit.SECONDS.sleep(5); // can use CountDownLatch to await add finished
+       System.out.println(list);
+   }
+
+   // CopyOnWriteArrayList
+   public static void testSafedList() {
+       List<String> list = new CopyOnWriteArrayList<>();
+       for (int i =0; i< 30; i++) {
+           new Thread(() -> {
+               list.add(UUID.randomUUID().toString());
+               System.out.println(list);
+           }).start();
+       }
+       System.out.println(list);
+   }
+   ```
+
+2. Set: `CopyOnWriteArraySet`
+3. Map: `ConcurrentHashMap`

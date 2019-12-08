@@ -1,9 +1,12 @@
+## [JUC](./JUC.md)
+
 ## Thread
 
 1. 在 Java 中, `Thread 类代表一个线程`; 每个 Java 程序启动后, 虚拟机将自动创建一个主线程
 2. 实现线程的两种方法:
    - 创建 `java.lang.Thread` 类的子类, 重写该类的 run 方 法[放置实质的线程体]; 调用 thread 对象的 `start()` 方法启动线程
    - 创建 `java.lang.Runnable` 接 口的实现类, 实现接口中的 run 方法; 调用 thread 对象的 `start()` 方法启动线程
+   - implement `callable` interface: implement Runnable interface and need Callable interface as arg, FutureTask, work as adaptor
 3. Runnable 接口优点:
 
    - 可以继承父类: 继承 Thread 的就不能继承父类了(Java 是单继承的)
