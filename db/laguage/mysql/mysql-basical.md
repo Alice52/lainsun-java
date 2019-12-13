@@ -252,9 +252,9 @@ DROP TABLE [IF EXISTS] TBALENAME;
 - 9.3 syntax
   ```sql
   CREATE PROCEDURE SP_NAME (IN|OUT|INOUT ARGUS  DATATYPE, ...)
-  N
-  Y
-  D
+  BEGIN
+    SP_BODY
+  END
   ```
 - 9.4 use
   ```sql
@@ -266,36 +266,35 @@ DROP TABLE [IF EXISTS] TBALENAME;
 ### Process control
 
 - if function
-  ````sql
+  ```sql
   IF (condition, value1, value2)
-  `
-  ````
+  ```
 - if elseif
   ```sql
   IF 情况1 THEN 语句1;
-  ;
-  .
-  ;
-  ;
+  ELSEIF 情况2 THEN 语句2;
+  ...
+  ELSE 语句N;
+  END IF;
   ```
 - case
 
   ```sql
   -- one
   CASE 表达式
-  )
-  )
-  .
-  )
-  E
+    WHEN 值1 THEN 结果1或语句1(如果是语句, 需要加分号)
+    WHEN 值2 THEN 结果2或语句2(如果是语句, 需要加分号)
+    ...
+    ELSE 结果N或语句N(如果是语句, 需要加分号)
+  END AS COLUMN_NAME
 
   -- other
-  case
-  )
-  )
-  .
-  )
-  E
+  CASE
+    WHEN 条件1 THEN 结果1或语句1(如果是语句, 需要加分号)
+    WHEN 条件2 THEN 结果2或语句2(如果是语句, 需要加分号)
+    ...
+    ELSE 结果N或语句N(如果是语句, 需要加分号)
+    END AS COLUMN_NAME
 
   -- more case in select
   SELECT CASE WHEN condition THEN VALUE1 ELSE VALUE2 END AS totalCashDrop,
@@ -304,30 +303,22 @@ DROP TABLE [IF EXISTS] TBALENAME;
   WHERE...
   ```
 
-- if elseif
-  ```sql
-  IF 情况1 THEN 语句1;
-  ;
-  .
-  ;
-  ;
-  ```
 - while
   ```sql
   LABEL: WHILE 循环条件  DO
-  体
-  ;
+      循环体
+    END WHILE LABEL;
   ```
 - loop
   ```sql
   LABEL: LOOP
-  ;
+    循环体;
   END LOOP LABEL;
   ```
 - repeat
   ```sql
   LABEL: REPEAT
-  ;
+    循环体;
   UNTIL 结束循环的条件
   END REPEAT LABEL;
   ```
