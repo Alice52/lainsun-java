@@ -1,5 +1,7 @@
 ## Stream 简介
 
+![ForkJoin](/static/image/java/javase-stream-summary.png)
+
 - Stream 对数据源`[集合等, 核心: 数据]`做一系列的流水线式的中间操作`[核心:计算]`, 产生一个新的 Stream; 且影响之前的数据源, 自己不存储流数据, `懒加载`
 - 示例图
   ![avatar](https://img-blog.csdnimg.cn/20190530144939845.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM3NzA0MzY0,size_16,color_FFFFFF,t_70)
