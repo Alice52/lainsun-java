@@ -8,6 +8,8 @@
 - 202: accept
 - 404: not find
 - 405: request method not support
+- 301: 代表永久性转移
+- 302: 代表暂时性转移(用户拿到之后再次请求)
 
 ## optimize
 
