@@ -16,9 +16,13 @@ systemctl start docker
 # 5. install gcc
 yum -y install gcc
 
-
 # 6. stop fallwalld
 systemctl stop fallwalld
+
+# 7. 开机自启动
+chkconfig --list
+chkconfig --add nginx
+chkconfig nginx on
 ```
 
 ---
