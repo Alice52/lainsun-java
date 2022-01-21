@@ -1,243 +1,167 @@
-**Table of Lambda Contents**
+# version2
 
-- [Lambda 表达式](#lambda-%E8%A1%A8%E8%BE%BE%E5%BC%8F)
-  - [语法](#%E8%AF%AD%E6%B3%95)
-  - [函数式接口](#%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3)
-  - [demo](#demo)
+## 相关结论
+
+1. lambda 不是匿名内部类的另一种实现, jdk 会自动生成一个私有静态方法[效率比匿名内部类高]
+2. lambda + stream 只有在数据量少下, 性能比原生的差, 但可读性变好
+3. lambda 会生成放入内存中的接口实现类, 如果大量使用会影响内存, 进而影响 GC
+4. lambda 只能使用外部 final 的变量: `可以访问自身外部类的私有变量{final(inline) 之后就不能改了保证外部类的稳定}`
+
+---
 
 ## Lambda 表达式
 
-- 原因: `主要是精简代码: 如匿名内部类相关的代码`
+- 原因: `主要是精简代码(可读性): ~~如匿名内部类相关的代码~~ 和匿名内部类是完全不同的东西`
 - 条件: 需要函数式接口的支持
 
-### 语法
+### 语法初始
 
-- 无参数无返回值[Runnable]: () -> System.out.println("hello lambda2");
+1. 无参数无返回值[Runnable]
 
-  ```java
-  final int num = 0; // JDK 1.7 之前必须是 final; JDK 1.8 默认加了 final: 不能让改变 num.
-  // 不使用 Lambda 表达式
-  Runnable runnable =new Runnable() {
-      @Override
-      public void run() {
-          System.out.println("hello lambda" + num);
-      }
-  };
+   ```java
+   // JDK 1.7 之前必须是 final; JDK 1.8 默认加了 final: 不能让改变 num.
+   final int num = 0;
 
-  // 使用 Lambda 表达式
-  Runnable runnable1 = () -> System.out.println("hello lambda2");
-  ```
+   // 不使用 Lambda 表达式
+   Runnable runnable =new Runnable() {
+       @Override
+       public void run() {
+           System.out.println("hello lambda" + num);
+       }
+   };
 
-- 有一个参数无返回值[Consumer]: (x) -> System.out.println(x) // ()可以不写
+   // 使用 Lambda 表达式
+   Runnable runnable1 = () -> System.out.println("hello lambda2");
+   ```
 
-  ```java
-  Consumer<String> consumer = (x) -> System.out.println(x);
-  Consumer<String> consumer = x -> System.out.println(x);
-  consumer.accept("练顺大傻逼！");
-  ```
+2. 有一个参数无返回值[Consumer]
 
-- 有两个参数有返回值[Comparator]: (x, y) -> x-y;
+   ```java
+   // (x) -> System.out.println(x) // ()可以不写
+   Consumer<String> consumer = (x) -> System.out.println(x);
+   Consumer<String> consumer = x -> System.out.println(x);
+   consumer.accept("练顺大傻逼！");
+   ```
 
-  ```java
-  Comparator<Integer> comparator = (x, y) -> {
-      System.out.println("sa");
-      return Integer.compare(x, y);
-  };
-  ```
+3. 有两个参数有返回值[Comparator]
 
-- 参数类型可以不写: JVM 可以进行 `类型推断`
+   ```java
+   // (x, y) -> x - y;
+   Comparator<Integer> comparator = (x, y) -> {
+       System.out.println("sa");
+       return Integer.compare(x, y);
+   };
+   ```
+
+4. 参数类型可以不写: JVM 可以进行 `类型推断`
 
 ### 函数式接口
 
-- 定义: **若接口中只有一个未实现的方法, 就称之为 `函数式接口`, 打上 `@FunctionalInterface` 注解**
-- Consumer<T>: void accept(T t)
+1. 定义: **只有一个未实现的方法 + @FunctionalInterface**
 
-  ```java
-  public void consume(double money, Consumer<Double> consumer) {
-      // 这里可以进行相应的逻辑处理
-      consumer.accept(money);
-  }
+2. Consumer<T>: void accept(T t)
 
-  @Test
-  public void testConsumer() {
-      consume(1000, (money) -> System.out.println("练顺去洗脚, 消费 " + money + " 元."));
-  }
+   ```java
+   Consumer<Integer> consumer = (money) -> System.out.println(money + " 元.");
+   consumer.accept(200);
+   ```
 
-  // 说明
-  Consumer<Double> con = (money) -> System.out.println("练顺去洗脚, 消费 " + money + " 元.");
-  consume(1000, con); // con.accept(1000)
+3. Function<T, R>: R apply(T t)
 
-  // 说明2
-  Consumer<Integer> consumer = (money) -> System.out.println("练顺去洗脚, 消费 " + money + " 元.");
-  consumer.accept(200);
-  ```
+   ```java
+   // 处理字符串: 获取字符串长度
+   public Integer strHandler(String str, Function<String, Integer> func) {
+       return func.apply(str);
+   }
 
-- Function<T, R>: R apply(T t)
+   @Test
+   public void testFunction() {
+       Integer size = strHandler("And this file just interprets the directory information at that level.",
+               (str) -> str.length());
+       System.out.println(size);
+   }
+   ```
 
-  ```java
-  // 处理字符串: 获取字符串长度
-  public Integer strHandler(String str, Function<String, Integer> func) {
-      Integer size = func.apply(str);
-      return size;
-  }
+4. Supplier<T>: T get()
 
-  @Test
-  public void testFunctionNoLambda() {
-      Integer size = strHandler("And this file just interprets the directory information at that level.", new Function<String, Integer>() {
-          @Override
-          public Integer apply(String s) {
-              return s.length();
-          }
-      });
-      System.out.println(size);
-  }
+   ```java
+   @Test
+   public void testSupplier2() {
+       Set set = new HashSet();
+       int size = 50;
+       Supplier<Integer> supplier = () -> (int)(Math.random() * 100);
+       for (int i = 0; i < size; i++) {
+           Integer n = supplier.get();
+           set.add(n);
+       }
+   }
+   ```
 
-  @Test
-  public void testFunction() {
-      Integer size = strHandler("And this file just interprets the directory information at that level.",
-              (str) -> str.length());
-      System.out.println(size);
-  }
+5. Predicate<T>: bool test(T t)
 
-  // 说明
-  @Test
-  public void testFunction() {
-    Function<String, Integer> func = (str) -> str.length();
-    int size = func.apply("And this file just interprets the directory information at that level.");
-    System.out.println(size);
-  }
-
-   // list
-  Function<Integer, List<Integer>> func2 = (x) -> {
-      List<Integer> integers = new ArrayList<>();
-
-      for (int i = 0; i < x; i++) {
-          int n = (int)(Math.random() * 100);
-          integers.add(n);
-      }
-      return integers;
-  };
-  System.out.println(func2.apply(50).size());
-  ```
-
-- Supplier<T>: T get()
-
-  ```java
-  // 在 num 范围内产生一些数, 并放入集合中
-  public Set<Integer> generateData(Integer num, Supplier<Integer> supplier) {
-      Set set = new HashSet();
-      for (int i = 0; i < num; i++) {
-          Integer n = supplier.get(); // 接口中的方法实现: () -> (int)(Math.random() * 100)
-          set.add(n);
-      }
-      return set;
-  }
-  @Test
-  public void testSupplier() {
-      Set set = generateData(50, () -> (int)(Math.random() * 100));
-      System.out.println(set);
-  }
-
-  // 说明
-  @Test
-  public void testSupplier2() {
-      Set set = new HashSet();
-      int size = 50;
-      Supplier<Integer> supplier = () -> (int)(Math.random() * 100);
-      for (int i = 0; i < size; i++) {
-          Integer n = supplier.get();
-          set.add(n);
-      }
-      System.out.println(set.size());
-  }
-  ```
-
-- Predicate<T>: bool test(T t)
-
-  ```java
-  // 将满足条件的字符串, 过滤满足条件的字符串.
+   ```java
    public List<String> filterStrings(List<String> strs, Predicate<String> predicate) {
-      List<String> sts = new ArrayList<>();
-      for (String str : strs) {
-          if (predicate.test(str)) sts.add(str);
-      }
-      return sts;
-  }
-  @Test
-  public void testAddListNoLambda() {
-      List<String> strings = Arrays.asList("hello", "zack", "logo", "fans");
-      List<String> strs = filterStrings(strings, new Predicate<String>() {
-          @Override
-          public boolean test(String s) {
-              return s.contains("a");
-          }
-      });
-      strs.forEach(System.out::println);
-  }
-  @Test
-  public void testAddList() {
-      List<String> strings = Arrays.asList("hello", "zack", "logo", "fans");
-      List<String> strs = filterStrings(strings, (str) -> str.contains("a"));
-      strs.forEach(System.out::println);
-  }
-  ```
+       List<String> sts = new ArrayList<>();
+       for (String str : strs) {
+           if (predicate.test(str)) sts.add(str);
+       }
+       return sts;
+   }
+   @Test
+   public void testAddList() {
+       List<String> strings = Arrays.asList("hello", "zack", "logo", "fans");
+       List<String> strs = filterStrings(strings, (str) -> str.contains("a"));
+       strs.forEach(System.out::println);
+   }
+   ```
 
-- 其他函数式接口
-  > BiFunction<T, U, R>: R apply(T t, U u)
-  > BinaryOperator<T>: T apply(T t1, T t2)
-  > UnaryOperator<T>: T apply(T t)
-  > BiConsumer<T, U>: void accept(T t, U u)
-  > ToIntFunction<T> ToLongFunction<T> ToDoubleFunction<T>: int applyAsInt(T value);
-  > IntFunction<R> LongFunction<R> DoubleFunction<R>: R apply(int value);
+6. 其他常见函数式接口
 
+   - BiFunction<T, U, R>: R apply(T t, U u)
+   - BinaryOperator<T>: T apply(T t1, T t2)
+   - UnaryOperator<T>: T apply(T t)
+   - BiConsumer<T, U>: void accept(T t, U u)
+   - ToIntFunction<T> ToLongFunction<T> ToDoubleFunction<T>: int applyAsInt(T value)
+   - IntFunction<R> LongFunction<R> DoubleFunction<R>: R apply(int value);
 
-###  柯里化和部分求值[Currying]
+### 柯里化和部分求值[Currying]
 
-- 将一个多参数的函数, 转换为一系列单参数函数.
+1. `将一个多参数的函数, 转换为一系列单参数函数`
 
-- sample
+2. sample
 
-    ```java
-    // functional/CurryingAndPartials.java
-    import java.util.function.*;
+   ```java
+   import java.util.function.*;
 
-    public class CurryingAndPartials {
-        // 未柯里化:
-        static String uncurried(String a, String b) {
-            return a + b;
-        }
-        public static void main(String[] args) {
-            // 柯里化的函数:
-            Function<String, Function<String, String>> sum =
-                a -> b -> a + b; // [1]
+   public class CurryingAndPartials {
+       // 未柯里化:
+       static String uncurried(String a, String b) {
+           return a + b;
+       }
+       public static void main(String[] args) {
+           System.out.println(uncurried("Hi ", "Ho"));
 
-            System.out.println(uncurried("Hi ", "Ho"));
-
-            Function<String, String>
-                hi = sum.apply("Hi "); // [2]
-            System.out.println(hi.apply("Ho"));
-
-            // 部分应用:
-            Function<String, String> sumHi =
-                sum.apply("Hup ");
-            System.out.println(sumHi.apply("Ho"));
-            System.out.println(sumHi.apply("Hey"));
-        }
-    }
-    ```
+           // 柯里化的函数:
+           Function<String, Function<String, String>> sum = a -> b -> a + b;
+           Function<String, String> sumHi = sum.apply("Hup ");
+           System.out.println(sumHi.apply("Ho"));
+           System.out.println(sumHi.apply("Hey"));
+       }
+   }
+   ```
 
 ### notice
 
-1. var in lambda must be final
+1. [var in lambda must be final](https://fangshixiang.blog.csdn.net/article/details/80355490)
 
-### demo
+### usage sample
 
-- 定制排序 Employee: 年龄-姓名
+1. 定制排序 Employee: 年龄-姓名
 
-  ```java
-  Collections.sort(employees, (employee1, employee2) -> {
-      if (employee1.getAge() == employee2.getAge()) return Double.compare(employee1.getSalary(), employee2.getSalary());
-      else return Integer.compare(employee1.getAge(), employee2.getAge());
-  });
-  employees.forEach(System.out::println);
-  ```
+   ```java
+   Collections.sort(employees, (employee1, employee2) -> {
+       if (employee1.getAge() == employee2.getAge()) return Double.compare(employee1.getSalary(), employee2.getSalary());
+       else return Integer.compare(employee1.getAge(), employee2.getAge());
+   });
+   employees.forEach(System.out::println);
+   ```

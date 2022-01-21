@@ -1,3 +1,13 @@
+## version2
+
+1. rest 接口命名规范
+   - api 必须有版本概念: v1, v2, v3
+   - 使用 token 来做用户权限: 不要使用 cookie
+   - url 大小写不敏感: 不要出现大写 + 使用 `-` 做字符串连接[seo]
+   - 相关的文档说明
+
+---
+
 ## api design
 
 - http[s]://host:port/api/v1.0/resources[:{id}] `如果不能唯一标识则需要写在 query 里`
@@ -6,7 +16,7 @@
 - `api/products/isexist/{userId}/{productName}`: 这个时有问题的, 不可读 + Action 命名不恰当 + 层级关系[避免层级过深的 URI]
 - `api/users/{userId}/products?productName={productName}`
 
-1. uri 代表的是一种资源: 名词+能表达出资源的含义+层次关系
+1. uri 代表的是一种资源[有一定的长度限制]: 名词+能表达出资源的含义+层次关系
 
    - Rest 的核心原则是`将API 拆分为逻辑上的资源`: 找出资源
 
@@ -16,6 +26,7 @@
      POST /tickets                          # 新建一个ticket
      PUT /tickets/12                        # 新建ticket 12
      DELETE /tickets/12                     # 删除ticket 12
+     DELETE /tickets/12,15                     # 删除ticket 12 和 15
      ```
 
    - 处理关联
@@ -68,7 +79,7 @@
    - PATCH: 返回资源, 改变的属性
    - DELETE: 删除 + 204 NO CONTENT
    - ~~HEAD: 获取资源的元数据~~
-   - ~~OPTIONS: 获取信息, 关于资源的哪些属性是客户端可以改变的~~
+   - OPTIONS[预检请求]: 获取信息, 关于资源的哪些属性是客户端可以改变的
 
    ```js
    // 由于 状态码 就这么多不能详细的描述问题, 所以 status 会设计为全部返回 200, reponse 里的 code 表示具体信息
