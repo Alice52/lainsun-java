@@ -10,6 +10,7 @@ lsb_release -a
 ps -ef | grep tomact | grep -v grep # 根据进程名查看
 lsof -i:8080 #根据端口号查看
 netstat -anp | grep 8080 #根据端口号查看
+Telnet IP PORT
 rpm -qa | grep -i mysql
 # 2.2 查看进程服务状态
 systemctl status mssql-server
@@ -52,6 +53,7 @@ head -number FILENAME
 
 # 9. echo
 echo "内容" >> FILENAME # 向 FILENAME 文件追加内容
+echo "内容" > FILENAME # 覆盖 FILENAME 文件
 
 # 10. ln  指令软链接也成为符号链接
 ln -s [原文件或目录] [软链接名] # 功能描述：给原文件创建一个软链接
