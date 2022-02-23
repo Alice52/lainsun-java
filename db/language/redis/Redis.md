@@ -454,8 +454,8 @@
 
    ```js
    discard // 取消事务, 放弃事务内的所有命令
-   exec    // 执行是屋内的所有的命令
-   multi   // 标记书屋块的开始
+   exec    // 执行事务内的所有的命令
+   multi   // 标记事务块的开始
    unwatch // 取消watch 命令对所有key的监视
    watch key [key ...] // 监视key, 如果事务执行之前被watch则事务会被打断
    ```
