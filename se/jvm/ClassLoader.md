@@ -232,3 +232,4 @@ public void testClassLoader() throws Exception {
 1. https://blog.csdn.net/u014634338/article/details/81434327
 2. http://blog.itpub.net/31561269/viewspace-2222522
 3. https://www.cnblogs.com/canacezhang/p/9237953.html
+4. classloader 热加载一个修改的类-arths
