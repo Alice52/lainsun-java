@@ -145,64 +145,62 @@
 
 ### common command
 
-1. bluk operation
-
-   - mset/mget, hmset ...
-
-2. 原子操作
-
-   - incr/incrby/hincrby
-
-3. key 命令在数据很多时不建议使用: 消耗资源
-
+0. key 命令在数据很多时不建议使用: 消耗资源
    - 使用 scan 替代: cursor + key 的正则模式 + 遍历的 limit hint
+1. generic
 
-4. common
+   - bluk operation: mset/mget, hmset ...
+   - 原子操作: incr/decrby/hincrby
+   - common
+     ```shell
+     # 切换数据库
+     SELECT 0
+     # 查看数据库key的数量
+     DBSIZE
+     # 清空DB
+     FLUSHDB
+     FLUSHALL
+     ```
+   - key
+     ```js
+     del key
+     keys *
+     dump key
+     exists key
+     expire key second
+     ttl/pttl  key
+     type key
+     move key db
+     persist ket // 删除过期时间
+     rename key newKey
+     ```
 
-   ```shell
-   # 切换数据库
-   SELECT 0
-   # 查看数据库key的数量
-   DBSIZE
-   # 清空DB
-   FLUSHDB
-   FLUSHALL
-   ```
+2. string: 字符串 || 数值 || bitmmap == redis 在使用时一定要统一客户端的编码
 
-5. key
+   - 二进制安全: redis server 与客户端交互式使用的是字节流[一字符对应一字节], 而不是字符流[各个语言间的对数字宽度的理解可能不一样: 数字上可能出现溢出];
+   - 字节流: 只要使用的客户端具有一致的编解码, 数据就不会被破坏
+   - **redis 没有数据类型的概念: 客户端存 2L, 但是 redis 返回的就是 2 字节, 此时就需要客户端自己判断类型做转换了**
 
    ```js
-   del key
-   keys *
-   dump key
-   exists key
-   expire key second
-   ttl/pttl  key
-   type key
-   move key db
-   persist ket // 删除过期时间
-   rename key newKey
+   // CRUD + 长度
+   get / mget || set / mset / setnxex || getset || del || strlen;
+   // 追加/覆盖/部分获取
+   append || setrang || getrange
+   // 原子: 只能是整数[1.6 incr 会报错]
+   incr / decr / incrby / decrby / ~~decrbyfloat~~
+   // 一定返回
+   type k1 string
+   // k1 对应的 value 是 string 返回 embstr || raw;
+   // k1 对应的 value 是 int 返回 int: 因为可以做 incr 操作嘛
+   // k1 对应的 value 是 float 返回 embstr
+   object encoding k1            // key 上的 encoding 是为了优化, 如果是 int 则可以直接 incr 操作; 如果是 embstr 则会先判断能否转换为 int[能则incr, 不能则报错]
+
+   // 二进制安全
+   set k1 99999                  // keylen 是 5, 不会存成4字节的整数
+   set k1 中                     // keylen 是 2[gbk]/3[utf8], 具体和客户端传过来时的字符集相关: 客户端先变成字节数组在出去 server
    ```
 
-6. string
-
-   ```js
-   // 获取
-   get / mget;
-   // 添加
-   set[mset] / setex / setnx[msetnx] / append;
-   // 长度
-   strlen;
-   // 删除
-   del;
-   // 原子
-   incr / decr / incrby / decrby;
-   // setrange设置指定区间范围内的值
-   getrange / setrange;
-   getset;
-   ```
-
-7. hash
+3. hash
 
    ```js
    // 添加
@@ -221,7 +219,7 @@
    hexists key / hkeys / hvals;
    ```
 
-8. list: 链表的操作无论是头和尾效率都极高
+4. list: 链表的操作无论是头和尾效率都极高
 
    ```js
    // 添加
@@ -236,7 +234,7 @@
    llen
    ```
 
-9. set
+5. set
 
    ```js
    // 添加
@@ -261,16 +259,16 @@
    sunion key key
    ```
 
-10. zset
+6. zset
 
-    ```js
-    // 添加
-    zadd Z_KEY SCORE KEY [SCORE KEY]
-    // 查看
-    zrange key i j
-    ```
+   ```js
+   // 添加
+   zadd Z_KEY SCORE KEY [SCORE KEY]
+   // 查看
+   zrange key i j
+   ```
 
-11. geo
+7. geo
 
 |      command      |          function          |               sample               |
 | :---------------: | :------------------------: | :--------------------------------: |
