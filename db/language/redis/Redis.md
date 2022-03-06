@@ -143,6 +143,12 @@
    /usr/local/bin/redis-cli -p 6379 shutdown
    ```
 
+3. redis 作为数据库和缓存的区别
+   - 作为高校缓存时, 数据安全不能得到保证
+   - 缓存不是全量数据, 热点数据
+   - 缓存应该随着访问变化而变化
+4. redis 作为消息队列 和 MQ 的区别
+
 ### common command
 
 0. key 命令在数据很多时不建议使用: 消耗资源
@@ -161,7 +167,7 @@
      FLUSHDB
      FLUSHALL
      ```
-   - key
+   - key: 查询不存在的 key 返回 nil
      ```js
      del key
      keys *
@@ -175,7 +181,7 @@
      rename key newKey
      ```
 
-2. string: 字符串 || 数值 || bitmmap == redis 在使用时一定要统一客户端的编码
+2. string: 字符串 || 数值{点赞,预扣库存减少数据库} || bitmmap || == redis 在使用时一定要统一客户端的编码
 
    - 二进制安全: redis server 与客户端交互式使用的是字节流[一字符对应一字节], 而不是字符流[各个语言间的对数字宽度的理解可能不一样: 数字上可能出现溢出];
    - 字节流: 只要使用的客户端具有一致的编解码, 数据就不会被破坏
@@ -190,15 +196,34 @@
    incr / decr / incrby / decrby / ~~decrbyfloat~~
    // 一定返回
    type k1 string
-   // k1 对应的 value 是 string 返回 embstr || raw;
+   // k1 对应的 value 是 string 返回 embstr || raw{bitset 也是}
    // k1 对应的 value 是 int 返回 int: 因为可以做 incr 操作嘛
    // k1 对应的 value 是 float 返回 embstr
    object encoding k1            // key 上的 encoding 是为了优化, 如果是 int 则可以直接 incr 操作; 如果是 embstr 则会先判断能否转换为 int[能则incr, 不能则报错]
+   ```
 
+   ```js
    // 二进制安全
    set k1 99999                  // keylen 是 5, 不会存成4字节的整数
    set k1 中                     // keylen 是 2[gbk]/3[utf8], 具体和客户端传过来时的字符集相关: 客户端先变成字节数组在出去 server
    ```
+
+   - bitmap: 登录{key 是用户}/活跃用户个数{key 是日期+bitop or}
+
+     ```js
+     // bitmap: 长度=offset/8 + 1
+     setbit k1 0  1                 // 长度为 1
+     setbit k1 7  1                 // 长度为 1
+     setbit k1 8  1                 // 长度为 2
+     setbit k1 30 1                 // 长度为 4
+
+     // 从(0)*8 - (1+1)*8即0-15 的二进制位上找第一个出现 1 的位置(在整个k1中): 最后两个参数不是二进制位置
+     bitpos k1 1 0  1               // 0
+     bitpos k1 1 2  3               // 30
+
+     bitop and/or k1 k2
+     bitcount k1 1 0  1             // 3 {0-15二进制上的1的个数}
+     ```
 
 3. hash
 
@@ -219,19 +244,28 @@
    hexists key / hkeys / hvals;
    ```
 
-4. list: 链表的操作无论是头和尾效率都极高
+4. list: 链表的操作无论是头和尾效率都极高, 可以当做 stack 或者 queue 或者 数组[lset/lindex] 使用
 
    ```js
+   // 个数
+   llen
+
    // 添加
    lpush/rpush
    // 删除
    lpop/rpop
-   // 获取
-   lindex key 2
+   ltim k1 start stop // 只保留 [start, stop] 数据
    // 获取所有
    lrange key 0 -1
-   // 个数
-   llen
+
+   // used as array
+   lindex key 2
+   // 修改第3+1个元素为 v1
+   lset k1 3 v1
+   // 删除count个v1: count 为负数这从后面开始删
+   lrem k1 [-]count v1
+   // 在 第一个 v1 后面插入一个 v2
+   linsert k1 after/before v1 v2
    ```
 
 5. set
@@ -247,14 +281,19 @@
    sismember key
    // 个数
    scard key
+
    // 随机找出: 不删除
    srandommember key COUNT
+      // COUNT 正数: 取出一个去重的结果集{不能超过已有集}
+      // COUNT 负数: 取出一个有重的结果集{一定满足 count 个数}
+      // COUNT 0: 不返回
    // 随机找出: 删除
    spop key COUNT
-   // 差集
-   sdiff key key
+
+   // 差集: 在k1中且不在k2中
+   sdiff k1 k2
    // 交集
-   sinter key key
+   sinter[store] key key
    // 并级
    sunion key key
    ```
@@ -262,27 +301,69 @@
 6. zset
 
    ```js
-   // 添加
-   zadd Z_KEY SCORE KEY [SCORE KEY]
-   // 查看
-   zrange key i j
+   127.0.0.1:6379> zadd k1  8 apple 2 banana 3 orange             // (integer) 0
+   127.0.0.1:6379> zrange k1 0 -1 withscores
+      // 1) "banana"
+      // 2) "2"
+      // 3) "orange"
+      // 4) "3"
+      // 5) "apple"
+      // 6) "8"
+   127.0.0.1:6379> zrange k1 0 -1
+      // 1) "banana"
+      // 2) "orange"
+      // 3) "apple"
+   // 取分数是 3-8 之间的
+   127.0.0.1:6379> ZRANGEBYSCORE k1 3 8
+      // 1) "orange"
+      // 2) "apple"
+   // 取分数最低的两个
+   127.0.0.1:6379> ZRANGE k1 0 1
+      // 1) "banana"
+      // 2) "orange"
+   // 取分数最高的两个
+   127.0.0.1:6379> ZrevRANGE k1 0 1
+      // 1) "apple"
+      // 2) "orange"
+   // 查看分数
+   127.0.0.1:6379> zscore k1 apple
+      // "8"
+   // 查看排名
+   127.0.0.1:6379> zrevrank k1 apple
+   (integer) 0
+
+   // 集合操作: 权重/聚合
+   127.0.0.1:6379> zadd k1 80 tom 60 sean 70 bady     // (integer) 3
+   127.0.0.1:6379> zadd k2 60 tom 40 sean 70 zack     // (integer) 3
+   127.0.0.1:6379> ZUNIONSTORE unkey 2 k1 k2          // (integer) 4
+   127.0.0.1:6379> ZRANGE unkey 0 -1 withscores
+      // 1) "bady"
+      // 2) "70"
+      // 3) "zack"
+      // 4) "70"
+      // 5) "sean"
+      // 6) "100"
+      // 7) "tom"
+      // 8) "140"
    ```
 
 7. geo
 
-|      command      |          function          |               sample               |
-| :---------------: | :------------------------: | :--------------------------------: |
-|      GEOADD       |        添加地理位置        |       GEOADD KEY l l member        |
-|      GEODIST      |       两点之间的距离       | GEODIST KEY member1 member2 [unit] |
-|      GEOHASH      |        返回 geohash        |         GEOHASH KEY member         |
-|      GEOPOS       |       返回经纬度位置       |         GEOPOS KEY member          |
-|     GEOREDIUS     |       半径圆内的用户       |      GEOREDIUS KEY l l 300 m       |
-| GEOREDIUSBYMEMBER | 半径圆内的用户: 用户为中心 | GEOREDIUSBYMEMBER KEY member 300 m |
+   |      command      |          function          |               sample               |
+   | :---------------: | :------------------------: | :--------------------------------: |
+   |      GEOADD       |        添加地理位置        |       GEOADD KEY l l member        |
+   |      GEODIST      |       两点之间的距离       | GEODIST KEY member1 member2 [unit] |
+   |      GEOHASH      |        返回 geohash        |         GEOHASH KEY member         |
+   |      GEOPOS       |       返回经纬度位置       |         GEOPOS KEY member          |
+   |     GEOREDIUS     |       半径圆内的用户       |      GEOREDIUS KEY l l 300 m       |
+   | GEOREDIUSBYMEMBER | 半径圆内的用户: 用户为中心 | GEOREDIUSBYMEMBER KEY member 300 m |
 
-12. HyperLogLog: 伯努利实验
+8. HyperLogLog: 伯努利实验
 
-    - 节约空间, 时间, 性能: 12k 的内存就可以统计 2^64 个数据[误差率 0.81%]
-    - 统计的数据不是精确的[有一定的误差], 但是此业务是允许的
+   - 节约空间, 时间, 性能: 12k 的内存就可以统计 2^64 个数据[误差率 0.81%]
+   - 统计的数据不是精确的[有一定的误差], 但是此业务是允许的
+
+9. pipeline
 
 ### config
 
@@ -341,20 +422,49 @@
    - auto-aof-rewrite-percentage 100
    - auto-aof-rewrite-min-size 64mb
 
-### durable
+### durable: 默认开启 RDB
+
+- 断电丢数据问题
 
 #### RDB: 会丢数据, 但是恢复快[只在 Slave 上持久化 RDB 文件]
 
-1. 相关命令
+0. rdb 存盘的是某一时刻的数据:
+
+   - ~~单线程阻塞不对外提供服务~~
+   - linux 的父子进程, 常规上是数据隔离的
+
+     ```shell
+     echo $$ | more # 输出父进程ID, 原因是 $$ 优先级高于 |
+     echo $BASHPID | more # 输出子进程ID
+
+     num=1
+     echo $num       # 1
+     /bin/bash       # 开启子进程
+     echo $num       # --, 此时可以 export num 就可以看见了
+     exit
+     echo $num       # 1
+
+     # export 的变量 子进程修改对父进程不可见
+     # export 的变量 父进程修改对子进程不可见
+     ```
+
+   - 创建子进程的问题: fork
+     1. 速度
+     2. 内存空间问题
+
+1. 相关命令: `save/bgsave`
 
    - 目录配置
      1. 默认是 rdb 文件名为 dump.rdb
      2. dir
      3. dbfilename
-   - 触发快照
-     1. save <seconds> <change>
-     2. `save ""` 标识禁用 rdb
-     3. flushall 也会产生 dump.rdb 文件, 但是内容 null
+     4. 存储的文件: dbfilename + dir
+   - 触发快照: 一个执行完后一个才能执行, 顺讯写
+     1. 手动触发 save <seconds> <change>: 阻塞{比如关机维护}
+     2. 手动触发 bgsave(fork): 非阻塞
+     3. 配置文件中 save: 其实触发的是 bgsave
+     4. `save ""` 标识禁用 rdb
+     5. flushall 也会产生 dump.rdb 文件, 但是内容 null
 
 2. 概念
 
@@ -363,23 +473,23 @@
    - 父进程继续接收并处理客户端发来的命令, 而子进程开始将内存中的数据写入硬盘中的临时文件
    - 持久化过程, 主线程不进行任何 IO[fork 结束之后就可以对外提供服务, 其他的 IO 操作由子进程进行]
 
-3. fork
+3. fork[指针+cow]: 速度快, 占用空间小
 
    - 复制一个与当前进程完全一样的进程[**变量, 环境变量, 程序计数器**]等, 并且作为原进程的子进程`[会造成间断性的暂停服务] + master 不要有rdb操作`
    - fork 进程时 redis 是不对外提供服务的
-   - 在执行 fork 的时候操作系统[Unix]会使用写时复制[copy-on-write]策略, 即**fork 函数发生的一刻父子进程共享同一内存数据**, 当父进程要更改其中某片数据时[如执行一个写命令], 操作系统会将该片数据复制一份以保证子进程的数据不受影响, 所以新的 RDB 文件存储的是执行 fork 一刻的内存数据
+   - 在执行 fork 的时候操作系统[Unix]会使用写时复制[copy-on-write]策略, 即**fork 函数发生的一刻父子进程共享同一内存数据**, 当父进程要更改其中某片数据时[如执行一个写命令], 操作系统会将该片数据复制一份在修改以保证子进程的数据不受影响, 所以新的 RDB 文件存储的是执行 fork 一刻的内存数据
    - 为此需要确保 Linux 系统允许应用程序申请超过可用内存[物理内存和交换分区]的空间, 方法是在/etc/sysctl.conf 文件加入 vm.overcommit_memory = 1, 然后重启系统或者执行 sysctl vm.overcommit_memory=1 确保设置生效
    - RDB 文件是经过压缩[可以配置 rdbcompression 参数以禁用压缩节省 CPU 占用]的二进制格式, 所以占用的空间会小于内存中的数据大小, 更加利于传输
 
-4. 存储的文件: dbfilename + dir
+4. feature
 
-5. feature
+   - 优点: 适合大规模的数据恢复
+   - 缺点: 只有一个 rdb 文件, 要是坏了就糟了
+   - 缺点: 对数据的完整性要求不高, 丢数据可能性大一点
+   - ~~fork 时需要 2 倍的内存~~: 这个是错误的
+   - bgsave/save 会触发 IO 操作, 所以也不会让一个 redis 的内存过于大
 
-   - 适合大规模的数据恢复
-   - 对数据的完整性要求不高
-   - fork 时需要 2 倍的内存
-
-6. 执行时机
+5. 执行时机
 
    - 手动执行 bgsave
    - 手动执行 save
@@ -387,18 +497,20 @@
    - 从节点连接到主节点发送 sync 命令, master 会执行 bgsave
    - shutdown/flushall
 
-7. conclusion
+6. conclusion
 
    ![avatar](/static/image/db/redis-rdb.png)
 
 #### AOF
 
-1. 概念
+1. 概念: **全量**
 
    - 以日志的形式来记录每个`写操作`, 重启时从头到尾执行一遍
    - aof 文件很大的话会很慢
 
-2. 存储的文件: appendonly + appendfilename
+2. 存储的文件
+   - 开启: appendonly yes/no
+   - 文件名称: appendfilename
 3. aof 文件恢复
 
    - 备份被写坏的 aof 文件
@@ -408,26 +520,29 @@
 4. rewrite
 
    - bgrewriteaof
-   - aof 文件过大时会 fork 出一个新的进程将文件重写[县写入临时文件]
-   - redis 会当 aof 文件大于 64M 且 size 翻倍时重写
+   - redis 会当 aof 文件大于 64M 且 size{重写后的 size} 翻倍时重写
+   - 4.0 之前会 fork 出一个新的进程将文件重写[先写入临时文件]: ~~是删除抵消的命令 + 合并重复的命令~~
+   - 4.0 之后会 rbd + aof
 
-5. 触发 aof
+5. 触发 aof: 调用 flush 进行刷盘
 
    - appendfsync always: 性能差一些
-   - appendfsync everysec: 异步每秒一个, 如果一秒内当即会有数据丢失
-   - appendfsync no: ~~不同步~~
+   - appendfsync everysec: 异步每秒一个, 如果一秒内当即会有数据丢失, buffer 满了会自动刷盘, 所以最多丢一个 buffer
+   - appendfsync no: ~~不同步~~, 这个是交给系统决定, 不是不同步, 可能会丢失一个 buffer 大小的数据
 
 6. feature
 
    - 数据丢失概率小
-   - aof 文件大于 rdb 时重启恢复慢
+   - 如果同时开启了 RDB 和 AOF, 数据恢复时只会使用 AOF
+   - aof 文件大于 rdb 时重启恢复慢: bgrewriteaof
    - no 时效率与 rdb 相同
+   - flushall 发生之后且没有发生 rewriteaof 数据是可以恢复的
 
 7. conclusion
 
    ![avatar](/static/image/db/redis-aof.png)
 
-#### 混合持久化
+#### 混合持久化{4.0}: RDB 的快 + AOF 的全量
 
 1. 需要保证 aof 和 rdb 都打开
 
@@ -458,7 +573,7 @@
    watch key [key ...] // 监视key, 如果事务执行之前被watch则事务会被打断
    ```
 
-3. practice
+3. practice: **两个客户端之间的顺序是谁的 exec 先达到谁先执行**
 
    - normal case
 
@@ -564,6 +679,7 @@
    - 单独的隔离操作: 事务中的命令会序列化顺序且排他的执行, 不会被打断
    - 没有隔离级别的概念: 提交之前都不会执行
    - 没有原子性: redis 中同一事物如果有一条失败, 其他命令依旧可以执行成功
+   - 不支持回滚: 官方说明是为了保证 redis 的快速和简单
 
 ### MQ
 
@@ -571,8 +687,30 @@
 
 ### HA
 
-#### master-slave
+1. 单机/单节点/单实例的问题
 
+   - 单节点故障: keepalived || AKF
+     1. x 轴(加机器): 主备(镜像全量) || 水平扩展
+     2. y 轴(拆业务): 业务上拆分为多个独立单元
+     3. z 轴(做分片): 对某个业务进行分片处理
+   - 容量问题
+   - 夜里问题: 并发/连接
+
+2. 主备带来数据一致性问题
+
+   - 同步强一致性{破坏可用性}: client 写之后 server 所有节点阻塞到数据完全一致{成功/失败}
+   - 异步弱一致性{异步 + 容忍数据丢失一部分}: client 写之后主节点成功则返回, 主节点将信息已给交给备机, 如果交给备机之前主机宕机, 备机生主机, 则数据丢失
+   - 最终数据一致性{解决丢失问题的一种方案/可能取到不一致性的数据}: client 写之后主节点, 主节点将数据丢给 kafka{可靠[集群]/响应快}之后才返回, 备机可以通过 kafka 拿到所有的数据
+
+3. 集群中的节点数量一般是奇数个, 且投票抉择是需要半数以上节点的{否则会脑裂问题}
+   - 3 个节点需要至少 2 票, 能容忍一个出问题{分区[包含宕机]}
+   - 4 个节点需要至少 3 票, 能容忍一个出问题, 但是 4 台机器出问题的风险比 3 台大
+   - 另外 4 比 3 台更容易投出僵持结果: 3 台是只有每个人都的一票是才会僵持; 4 台是没人一票会僵持, 两个两票也会僵持
+
+#### master-slave: 主从复制
+
+0. 简介
+   - redis 使用默认的异步复制: 低延迟+高性能
 1. 概念: `配从不配主`
 
    - master: 写为主, slave: 读为主
@@ -602,7 +740,9 @@
 2. master 接到命令启动后台的存盘进程[bgsave], 同时收集所有接收到的用于修改数据集命令[生成 rdb 文件], 在后台进程执行完毕之后, master 将传送整个数据文件到 slave, 以完成一次完全同步: master 新的数据会记录到内存 buffer
 3. 全量复制: 而 slave 服务在接收到数据库文件数据后, 将其存盘并加载到内存中, 之后通知 master buffer 可以继续同步
 4. 增量复制: master 继续将新的所有收集到的修改命令依次传给 slave, 完成同步
-5. 但是只要是重新连接 master, 一次完全同步[全量复制]将被自动执行
+5. 但是只要是重新连接 master
+   - 手动写 replicateof 就一定会触发 bgsave 完全同步[全量复制]将被自动执行
+   - 但是如果是只开启 rdb [rdb 文件中会记录同步到哪里了]且走配置文件时只会增量追加, 否则会使全量同步一次
 
 #### ~~sentinel~~
 
@@ -831,3 +971,9 @@
      1. 延迟计算公式: `DELAY = 500ms + random(0 ~ 500ms) + SLAVE_RANK * 1000ms`
      2. SLAVE_RANK 表示此 slave 已经从 master 复制数据的总量的 rank
      3. Rank 越小代表已复制的数据越新. 这种方式下, 持有最新数据的 slave 将会首先发起选举[理论上]
+
+--
+
+## others
+
+1. 脑裂 || 分区容错
