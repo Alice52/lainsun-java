@@ -425,3 +425,5 @@
 
 5. Memory
    - paramters of memory: [memory-limit](https://emacsist.github.io/2016/12/01/rabbitmq%E4%B8%AD%E7%9A%84%E5%86%85%E5%AD%98%E4%B8%8E%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6/)
+6. https://blog.csdn.net/dingjianmin/article/details/121031996
+7. https://blog.csdn.net/qq_42029989/article/details/122110784
