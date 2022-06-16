@@ -815,10 +815,10 @@
    }
    ```
 
-5. 组合任务: 被组合的是异步的则需要 join， cf.getNow(null) 得到的就是 null
+5. 组合任务: **被组合的是异步的则需要** join， cf.getNow(null) 得到的就是 null
 
    ```java
-   // 1. thenCombine 组合两个 Future, 获取两个 future 的结果, 并返回当前任务的结果
+   // 1. thenCombine 组合两个 Future{异步执行}, 获取两个 future 的结果, 并返回当前任务的结果
    public <U,V> CompletableFuture<V> thenCombine(CompletionStage<? extends U> other, BiFunction<? super T,? super U,? extends V> fn)
    public <U,V> CompletableFuture<V> thenCombineAsync(CompletionStage<? extends U> other, BiFunction<? super T,? super U,? extends V> fn)
    public <U,V> CompletableFuture<V> thenCombineAsync(CompletionStage<? extends U> other, BiFunction<? super T,? super U,? extends V> fn, Executor executor)
@@ -858,6 +858,16 @@
 
    // 9. anyOf 只要有一个任务完成, 可以拿到该执行完成后的结果 get()
    public static CompletableFuture<Object> anyOf(CompletableFuture<?>... cfs)
+   ```
+
+6. sample
+
+   ```java
+   // 异步执行两个任务后得到结果, 做计算并返回
+   return supplyAsync(() -> countParticipantInScope(currentMemberId, activity))
+           .thenCombine(supplyAsync(() -> getCurrentRank(currentMemberId, activity))
+                   ,(count, rank) -> setCR(count, rank, basicInfoVO))
+           .get();
    ```
 
 ## 扩展
