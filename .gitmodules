@@ -1,3 +1,6 @@
 [submodule "programming-principles"]
 	path = programming-principles
 	url = git@github.com:Alice52/programming-principles.git
+[submodule "database"]
+	path = database
+	url = git@github.com:Alice52/database.git
