@@ -1,0 +1,3 @@
+[submodule "programming-principles"]
+	path = programming-principles
+	url = git@github.com:Alice52/programming-principles.git
