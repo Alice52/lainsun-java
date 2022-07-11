@@ -1,3 +1,5 @@
+[TOC]
+
 ## setting 配置
 
 1. version-1
