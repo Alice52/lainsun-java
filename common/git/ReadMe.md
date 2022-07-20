@@ -8,9 +8,9 @@
 
 ---
 
-## usage
+## tricks
 
-1. push code to gitee and github[origin]
+1. [push code to gitee and github[origin]](https://www.jianshu.com/p/747e2bb71775)
 
    ```shell
     # config
@@ -24,6 +24,23 @@
     git push gitee BRANCH_NAME
    ```
 
+2. worktree: 切分支工作
+
+   ```shell
+   # 比如需要进入 branch_a 工作
+   git worktree add DIR_NAME branch_a
+   cd DIR_NAME
+   # 此时这个工作空间是 branch_a 全新的且没有任何改动的
+
+   # 在 branch_a 的工作结束后回到原分支
+   cd REPO_NAME
+
+   # 删除 worktree
+   git worktree remove DIR_NAME
+   ```
+
 ## reference
 
-1. https://www.jianshu.com/p/747e2bb71775
+1. [offical website](https://git-scm.com/docs)
+1. [practice website](https://learngitbranching.js.org/)
+1. [bili](BV1TA411q75f)
