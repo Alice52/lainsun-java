@@ -112,10 +112,12 @@ rm -rf /var/lib/docker
   # 1. install zsh
   echo $SHELL
   yum -y install zsh
+  echo $ZSH_VERSION
   cat /etc/shells
   chsh -s /bin/zsh
   # 2. install oh-my-zsh
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  uninstall_oh_my_zsh zsh
   ```
 
 - nc
