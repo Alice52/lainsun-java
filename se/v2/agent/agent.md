@@ -47,41 +47,40 @@
    - 在第一次加载时拦截： `addTransformer`[cannot add method]
 
      ```java
-      instrumentation.addTransformer(
-         (loader, className, classBeingRedefined, protectionDomain, classfileBuffer) -> {
-           if (!className.equals("cn/edu/ntu/javase/agent/Server")) {
-             return null;
-           }
-           return IOUtils.readFully(inputStream, -1, false);
-         });
+     instrumentation.addTransformer(
+        (loader, className, classBeingRedefined, protectionDomain, classfileBuffer) -> {
+          if (!className.equals("cn/edu/ntu/javase/agent/Server")) {
+            return null;
+          }
+          return IOUtils.readFully(inputStream, -1, false);
+        });
      ```
 
    - 重新加载一个类进 jvm: retransformClasses:[can add method]
 
-   ```java
-   instrumentation.addTransformer(
-       (loader, className, classBeingRedefined, protectionDomain, classfileBuffer) -> {
-         if (!className.equals("cn/edu/ntu/javase/agent/Server")) {
-           return null;
-         }
-           return IOUtils.readFully(inputStream, -1, false);
-       },
-       true);
+     ```java
+     instrumentation.addTransformer(
+         (loader, className, classBeingRedefined, protectionDomain, classfileBuffer) -> {
+           if (!className.equals("cn/edu/ntu/javase/agent/Server")) {
+             return null;
+           }
+             return IOUtils.readFully(inputStream, -1, false);
+         },
+         true);
 
-   instrumentation.retransformClasses(Server.class);
-   ```
+     instrumentation.retransformClasses(Server.class);
+     ```
 
    - 重新加载一个类进 jvm: redefineClasses[cannot add method]
 
-   ````java
-       byte[] bytes = IOUtils.readFully(inputStream, -1, false);
-       instrumentation.redefineClasses(new ClassDefinition(Server.class, bytes));
-       ```
-   ````
+     ```java
+     byte[] bytes = IOUtils.readFully(inputStream, -1, false);
+     instrumentation.redefineClasses(new ClassDefinition(Server.class, bytes));
+     ```
 
 ## javassist
 
-1. javassist 是一个开源的[jboss]分析, 编辑和创建 java 字节码的类库
+1. javassist(asm) 是一个开源的[jboss]分析, 编辑和创建 java 字节码的类库
 
 2. dependency
 
@@ -174,11 +173,11 @@
    - 参数: url, args, cookie, head, spend time, exception
    - 可用性: 项目无关, 架构无关, 容器无关
    - 埋点位置
-     | location | 优点 | 缺点 |
-     | :------------------------: | :------------------------: | :------------------------------------------------------------------------------------------------- |
-     | controller | 简单, 风险因素低 | 判别成本高有局限性:[只能根据 HttpServlet 子类或@RequestMapping 进行判别] |
-     | DispatchServlet.doDispatch | 简单, 适用性强 | 只能是 springmvc 项目[springboot 就不行] |
-     | HttpServlet.service | 适用性强, 与应用和框架无关 | 不同容器的 class-path 不一样, 存下兼容性问题<br/> 风险高[所有方法都会到这里] <br/> 业务异常无法捕获 |
+     | location | 优点 | 缺点 | extra |
+     | :------------------------: | :------------------------: | :------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- |
+     | controller | 简单, 风险因素低 | 判别成本高有局限性| 只能根据 HttpServlet 子类或@RequestMapping 进行判别
+     | DispatchServlet.doDispatch | 简单, 适用性强 | 只能是 springmvc 项目 |springboot 就不行
+     | HttpServlet.service | 适用性强, 与应用和框架无关 | 不同容器的 class-path 不一样 | 存下兼容性问题, 风险高[所有方法都会到这里], 业务异常无法捕获 |
 
    - step:
 
@@ -210,3 +209,5 @@
    - traceSession 机制
 
      ![avatar](/static/image/java/javaee-trace-session.png)
+
+4. arthas 就是基于 JDK instrument{提供了对 jvm 底层组件访问的能力}, 通过 ASM 等字节码增强计数来实现 增强和热替
