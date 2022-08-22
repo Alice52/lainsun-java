@@ -9,7 +9,7 @@
 │   │   ├── 3.npe.md
 │   │   └── common.md
 │   ├── common
-│   │   └── 1.cross-domai.md
+│   │   └── 1.cross-domain.md
 │   ├── docker
 │   │   ├── docker-compose-dev.yml
 │   │   ├── docker-compose.md
