@@ -212,6 +212,8 @@
 ### 4. volume: **`-v`**
 
 1. function: durable data to disk, share data between host and container
+   - `-v`: 会使用宿主机的内容覆盖容器的内容
+   - `volumns`: 不会使用宿主机的内容覆盖容器的内容
 2. command
 
    ```shell
@@ -266,25 +268,25 @@
    - definition: 命名的容器挂载数据卷, 其它容器通过挂载这个(父容器)实现数据共享, 挂载数据卷的容器, 称之为数据卷容器
    - transfer data between containers
 
-   ```shell
-   # MIRROR_ID have defined volume, suach as /zack
-   # 1. run container01 with image
-   docker run -it --name container01 MIRROR_ID
-   # 2. run container02 with same image, and point parent volume
-   docker run -it --name container02 --volumes-from container01 MIRROR_ID
-   # 3. run container03 with same image, and point parent volume
-   docker run -it --name container03 --volumes-from container01 MIRROR_ID
-   # 4. run container04 with same image, and point parent volume
-   docker run -it --name container03 --volumes-from container02 MIRROR_ID
+     ```shell
+     # MIRROR_ID have defined volume, such as /zack
+     # 1. run container01 with image
+     docker run -it --name container01 MIRROR_ID
+     # 2. run container02 with same image, and point parent volume
+     docker run -it --name container02 --volumes-from container01 MIRROR_ID
+     # 3. run container03 with same image, and point parent volume
+     docker run -it --name container03 --volumes-from container01 MIRROR_ID
+     # 4. run container04 with same image, and point parent volume
+     docker run -it --name container03 --volumes-from container02 MIRROR_ID
 
-   # now if created in file in container01:/zack, can get it in container02:/zack and container03:/zack and container04:/zack
-   # now if created in file in container02:/zack, can get it in container01:/zack and container03:/zack and container04:/zack
-   # now if created in file in container03:/zack, can get it in container01:/zack and container02:/zack and container04:/zack
-   # now if created in file in container04:/zack, can get it in container01:/zack and container02:/zack and container03:/zack
+     # now if created in file in container01:/zack, can get it in container02:/zack and container03:/zack and container04:/zack
+     # now if created in file in container02:/zack, can get it in container01:/zack and container03:/zack and container04:/zack
+     # now if created in file in container03:/zack, can get it in container01:/zack and container02:/zack and container04:/zack
+     # now if created in file in container04:/zack, can get it in container01:/zack and container02:/zack and container03:/zack
 
-   # 4. remove container01, no any effect
-   docker rm -f container01 # stop and remove
-   ```
+     # 4. remove container01, no any effect
+     docker rm -f container01 # stop and remove
+     ```
 
 ### 5. DockerFile
 

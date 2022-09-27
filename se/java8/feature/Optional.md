@@ -1,3 +1,22 @@
+## version 2
+
+1. findFirst() 选取的第一个元素为空则会 NPE: **原因是 Optional.of() 不允许为空**
+
+   ```java
+   // NullPointerException - if the element selected is null
+   findFirst();
+
+   List<String> strings = new ArrayList<>();
+   strings.add(null);
+   strings.add("test");
+
+   String firstString = strings.stream()
+           .findFirst/finAny() // Exception thrown here
+           .orElse("StringWhenListIsEmpty");
+   ```
+
+---
+
 ### introduce
 
 - `用 Optional 来包装一个可能为 null 值的变量, 其最大意义其实仅仅在于给了调用者一个明确的警示`
