@@ -1,9 +1,9 @@
 [submodule "database"]
 	path = database
 	url = git@github.com:Alice52/database.git
-[submodule "common/common-http"]
-	path = common/common-http
-	url = git@github.com:Alice52/common-http.git
 [submodule "programming"]
 	path = programming
 	url = git@github.com:Alice52/programming.git
+[submodule "http"]
+	path = http
+	url = git@github.com:Alice52/http.git

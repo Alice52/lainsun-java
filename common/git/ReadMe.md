@@ -5,6 +5,7 @@
 3. [git command](./3.command.md)
 4. [git rebase](./4.rebase.md)
 5. [git submodule](./5.submodule.md)
+6. [git theory](./6.theroy.md)
 
 ---
 
@@ -38,6 +39,11 @@
    # 删除 worktree
    git worktree remove DIR_NAME
    ```
+
+3. 一份代码需要在两个仓库提交
+
+   - ~~手动复制代码, 之后提交~~
+   - 跨仓库的使用 cherry-pick, 之后提交
 
 ## reference
 

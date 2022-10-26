@@ -1,5 +1,219 @@
 {
-  "recommendations": [
-    "gruntfuggly.todo-tree"
+  // ******************************************************************** common **************************************************************************
+  "files.associations": {
+    "*.cjson": "jsonc",
+    "*.wxss": "css",
+    "*.wxs": "javascript",
+    "*.vue": "vue",
+    "*.conf": "ignore",
+    ".Jenkins": "groovy"
+  },
+  "emmet.includeLanguages": {
+    "wxml": "html",
+    "vue-html": "html",
+    "vue": "html"
+  },
+  "minapp-vscode.disableAutoConfig": true,
+  "editor.renderControlCharacters": true,
+  "editor.renderWhitespace": "all",
+  // 启用后，保存文件时在文件末尾插入一个最终新行
+  "files.insertFinalNewline": true,
+  // 启用后，将在保存文件时剪裁尾随空格
+  "files.trimTrailingWhitespace": true,
+  // 加载和侧边栏显示时,忽略的文件/文件夹
+  "files.exclude": {
+    "**/.DS_Store": true,
+    "**/.hg": true,
+    "**/.idea": true,
+    "**/.sass-cache": true,
+    "**/.svn": true,
+    "**/node_modules": true
+  },
+  // 改变 powershell 为 git 相关
+  "terminal.integrated.profiles.windows": {
+    "git-bash": {
+      "path": "E:\\Git\\bin\\bash.exe",
+      "args": []
+    },
+    "git-bash-c": {
+      "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+      "args": []
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "git-bash-c",
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  // "terminal.integrated.fontFamily": "\"Fira Mono for Powerline\"",
+  // "terminal.integrated.fontFamily": "'Fira Code'",
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.fontWeight": "500",
+  // 启用后，将使用的参数和方法名称的类型进行提示。
+  "docthis.inferTypesFromNames": true,
+  "extensions.ignoreRecommendations": true,
+  "workbench.statusBar.feedback.visible": false,
+  "workbench.iconTheme": "material-icon-theme",
+  "editor.fontLigatures": true,
+  "editor.fontFamily": "'Fira Code', Consolas, 'Courier New', monospace",
+  "editor.fontSize": 16,
+  "editor.fontWeight": "500",
+  "markdown.preview.fontFamily": "'Fira Code', -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif",
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "workbench.startupEditor": "newUntitledFile",
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // ******************************************************************** common **************************************************************************
+  // ******************************************************************** vue **************************************************************************
+  "editor.tabSize": 2, //制表符符号eslint
+  "editor.formatOnSave": true, //每次保存自动格式化
+  "prettier.eslintIntegration": true, //让prettier使用eslint的代码格式进行校验
+  "prettier.semi": true, //去掉代码结尾的分号
+  "prettier.singleQuote": true, //使用带引号替代双引号
+  "javascript.format.insertSpaceBeforeFunctionParenthesis": true, //让函数(名)和后面的括号之间加个空格
+  "vetur.format.defaultFormatter.html": "js-beautify-html", //格式化.vue中html
+  "vetur.format.defaultFormatterOptions": {
+    "prettier": {
+      "semi": false, //  不要分号分号
+      "singleQuote": true //  要单引号
+    },
+    "js-beautify-html": {
+      // #vue组件中html代码格式化样式
+      "wrap_attributes": "force-aligned", //也可以设置为“auto”，效果会不一样
+      "wrap_line_length": 200,
+      "end_with_newline": true,
+      "semi": false,
+      "singleQuote": true
+    }
+  },
+  "eslint.format.enable": true, // eslint格式化开启
+  "eslint.validate": [
+    // eslint校验的文件列表
+    "javascript",
+    "vue",
+    "html"
+  ],
+  /* 添加如下配置 */
+  "vetur.format.defaultFormatter.js": "vscode-typescript", // 取消vetur默认的JavaScript格式化工具
+  "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint" // 只采用eslint的格式化
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint" // vue文件还是采用vetur格式化
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "liveServer.settings.donotShowInfoMsg": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "security.workspace.trust.untrustedFiles": "open",
+  "workbench.editorAssociations": {
+    "*.svg": "hediet.vscode-drawio-text",
+  },
+  "hediet.vscode-drawio.local-storage": "eyIuZHJhd2lvLWNvbmZpZyI6IntcImxhbmd1YWdlXCI6XCJcIixcImN1c3RvbUZvbnRzXCI6W10sXCJsaWJyYXJpZXNcIjpcImdlbmVyYWxcIixcImN1c3RvbUxpYnJhcmllc1wiOltcIkwuc2NyYXRjaHBhZFwiXSxcInBsdWdpbnNcIjpbXSxcInJlY2VudENvbG9yc1wiOltcIjAwMDAwMFwiLFwiQ0MwMDAwXCIsXCIwMDAwQ0NcIixcIkZGMDBGRlwiLFwiNjZGRkIzXCIsXCJGRjY2RkZcIixcIkZGMDA4MFwiLFwiOTk5OTAwXCIsXCIwMDAwOTlcIixcIkZGOTk5OVwiLFwiMDBGRkZGXCJdLFwiZm9ybWF0V2lkdGhcIjoyNDAsXCJjcmVhdGVUYXJnZXRcIjpmYWxzZSxcInBhZ2VGb3JtYXRcIjp7XCJ4XCI6MCxcInlcIjowLFwid2lkdGhcIjo4NTAsXCJoZWlnaHRcIjoxMTAwfSxcInNlYXJjaFwiOnRydWUsXCJzaG93U3RhcnRTY3JlZW5cIjp0cnVlLFwiZ3JpZENvbG9yXCI6XCIjZDBkMGQwXCIsXCJkYXJrR3JpZENvbG9yXCI6XCIjNmU2ZTZlXCIsXCJhdXRvc2F2ZVwiOnRydWUsXCJyZXNpemVJbWFnZXNcIjpudWxsLFwib3BlbkNvdW50ZXJcIjowLFwidmVyc2lvblwiOjE4LFwidW5pdFwiOjEsXCJpc1J1bGVyT25cIjpmYWxzZSxcInVpXCI6XCJcIn0ifQ==",
+  "extensions.autoUpdate": false,
+  "hediet.vscode-drawio.theme": "Kennedy",
+  "hediet.vscode-drawio.codeLinkActivated": false,
+  "markdown-preview-enhanced.previewTheme": "vue.css",
+  "todo-tree.general.tags": [
+    "BUG",
+    "HACK",
+    "FIXME",
+    "TODO",
+    "XXX",
+    "[ ]",
+    "[x]",
+    "todo"
+  ],
+  // ******************************************************************** vue **************************************************************************
+  "java.jdt.ls.lombokSupport.enabled": true,
+  "java.import.maven.enabled": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx1G -Xms100m -javaagent:\"c:\\Users\\asd\\.vscode\\extensions\\vscjava.vscode-lombok-1.0.1\\server\\lombok.jar\"",
+  "terminal.integrated.enableMultiLinePasteWarning": false,
+  "redhat.telemetry.enabled": false,
+  "workbench.colorTheme": "Default Light+",
+  "cSpell.userWords": [
+    "Arthas",
+    "binlog",
+    "classloader",
+    "CLASSPATH",
+    "CONCAT",
+    "conceps",
+    "Datagram",
+    "degit",
+    "Dockfile",
+    "empno",
+    "fddi",
+    "filesort",
+    "goaccess",
+    "groupby",
+    "innodb",
+    "javaagent",
+    "javaee",
+    "javase",
+    "javassist",
+    "leetcode",
+    "LTRIM",
+    "mastser",
+    "msserver",
+    "mssql",
+    "mvcc",
+    "myisam",
+    "MYPATH",
+    "Nagle",
+    "netcore",
+    "nvarchar",
+    "pinia",
+    "PMTU",
+    "pnpm",
+    "Premain",
+    "Protocal",
+    "Qube",
+    "rowid",
+    "RTRIM",
+    "servlet",
+    "snmp",
+    "springboot",
+    "springmvc",
+    "stickybag",
+    "struct",
+    "taze",
+    "tidb",
+    "undolog",
+    "Unocss",
+    "unplugin",
+    "varchar",
+    "Vitesse",
+    "vuex",
+    "WORKDIR",
+    "zack"
+  ],
+  "git.mergeEditor": false,
+  "remote.SSH.remotePlatform": {
+    "alice3.hubby.top": "linux"
+  },
+  "git.ignoreLegacyWarning": true,
+  "gitlens.advanced.messages": {
+    "suppressGitVersionWarning": true
+  },
+  "hexeditor.columnWidth": 16,
+  "hexeditor.showDecodedText": true,
+  "hexeditor.defaultEndianness": "little",
+  "hexeditor.inspectorType": "aside",
+  /******************golang***********************************/
+  "gopls": {
+    "experimentalWorkspaceModule": true,
+  },
+  "go.toolsEnvVars": {
+    // "GOFLAGS": "-mod=/xx/path" // "GOFLAGS": "-mod=mod"
+  },
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": [
+    "--fast"
   ]
 }
