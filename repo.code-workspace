@@ -1,0 +1,28 @@
+{
+  "folders": [
+    {
+      "path": ".",
+      "name": "java-ocean"
+    },
+    {
+      "path": "database",
+      "name": "database"
+    },
+    {
+      "path": "http",
+      "name": "http"
+    },
+    {
+      "path": "programming",
+      "name": "programming"
+    },
+  ],
+  "settings": {
+    "files.exclude": {
+      "database": true,
+      "http": true,
+      "programming": true,
+      "repo.code-workspace": true
+    }
+  }
+}
