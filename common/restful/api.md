@@ -1,10 +1,38 @@
 ## version2
 
-1. rest 接口命名规范
-   - api 必须有版本概念: v1, v2, v3
-   - 使用 token 来做用户权限: 不要使用 cookie
+1. 简介
+
+   - rest 全称: 表述性状态转移, `restful = 有意义的 URL + 合适的 HTTP 动词`
+   - restful 是一种对基于 http 的满足一定`规范与约束`的应用设计风格(统一接口){不是一种标准}, 尽可能复用 HTTP 特性来规范软件设计{甚至提高传输效率}
+   - restful 的本质是基于 http 协议对**资源**的增删改查操作做出定义
+   - rest 清晰可读, 简单, 易用, 高效, **无状态**
+
+2. 规范与约束
+
+   - 每个资源都拥有一个唯一资源标识
+   - 消息的自描述性
+   - 资源的自描述性
+   - hateoas Hypermedia As The Engine Of Application State(超媒体作为应用状态引擎)
+
+   ![avatar](/static/image/common/rest-constraint.png)
+
+3. restful 接口命名规范实践
+
+   - url 表达只是被操作的资源位置: 因此不应该使用动词, 且注意单复数区分
+   - api 应该有版本概念, 且在 accept 中使用并校验
+   - rest 对 body 内容没有限制
    - url 大小写不敏感: 不要出现大写 + 使用 `-` 做字符串连接[seo]
    - 相关的文档说明
+   - _使用 token 来做用户权限: 不要使用 cookie_
+   - _除了 post 和 delete 之外, 其他的操作需要冥等的_
+
+## notice
+
+1. api 定义: 和语言无关, 理论上具有网络操作能力的所有编程语言都可以提供 api 服务
+2. restful api 并非银弹, 其表达能力其实有限, 具体 api 设计可以参考 GitHub 的 API 设计
+
+   - 资源
+   - 动词: 非标准 rest{但是实用}
 
 ---
 
@@ -244,3 +272,4 @@
 
 1. [rest-api simple concept](http://www.ruanyifeng.com/blog/2014/05/restful_api.html)
 2. [rest-api design](https://www.cnblogs.com/duanweishi/p/9539219.html)
+3. https://zhuanlan.zhihu.com/p/54976216
