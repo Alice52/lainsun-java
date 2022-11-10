@@ -10,7 +10,6 @@
    - reg
    - oauth
    - json
-   - restful
    - build: cicd
    - tool: vscode | idea | tip(chrome)
 2. java
