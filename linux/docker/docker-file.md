@@ -49,7 +49,7 @@
     CMD echo "test CMD"/$VAR
     ```
 
-11. `ENTRYPOINT` - function as `COPY`, **`no overwrite last command`**
+11. `ENTRYPOINT` - function as `COPY`, **`no overwrite last command`**, **`且不能识别env & arg 变量`**
 12. `ONBUILD` - run this command when building an inherited Dockerfile **`[FROM PARENT_IMAGE]`** and the parent image's onbuild is triggered
 
     ```shell
