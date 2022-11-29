@@ -1,69 +1,166 @@
-## Java Inner Class
+[toc]
 
-1. 在类的内部定义类称为内部类
-2. `内部类相当于类的一个成员`, 可以修饰成员的 `public static final abstract` 都可以修饰内部类
+## intros
 
-### 1. Common Inner Class:
+1. java 允许在类的内部定义类-嵌套(内部)类
 
-1. introduce
+   - 嵌套类: 静态内部类 + 内部类(非静态成员类 | 匿名类 | 局部类)
+   - `内部类相当于类的一个成员`: 封装隐匿
+   - 可以使用 `public/private/protected | static | final | abstract` 修饰
 
-- 1. exist depending on outer class objects: if want to create inner class, we should create outer class.
-- 2. inner class have access to all member of outer class.
-- 3. outer class have access to all member of inner class.
-- 4. common inner class do not have static member.
+2. 分类
 
-2. syntax
+   - **静态内部类**
+   - 常规内部类
+   - 匿名内部类
+   - 局部内部类
+
+3. 区分维度
+
+   - 是否依赖于外部类
+   - 成员变量种类
+   - 外部类对内部类的属性访问
+   - 内部类对外部类的属性访问
+   - 创建: 在外部类中 | 在其他类中
+
+   |   type    | 赖于外部类 | 成员变量类型 | 静属性 o->i | 非静属性 o->i | 静属性 i->o | 非静属性 i->o | 是否可创建 |
+   | :-------: | :--------: | :----------: | :---------: | :-----------: | :---------: | :-----------: | :--------: |
+   |  common   |     Y      | 不可 static  |     _Y_     |       N       |      Y      |       Y       |     Y      |
+   |  static   |     N      |  可 static   |      Y      |       N       |      Y      |       N       |     Y      |
+   | anonymous |    _Y_     | 不可 static  |     _Y_     |       N       |      Y      |       Y       |    _Y_     |
+   |   local   |    _Y_     | 不可 static  |     _Y_     |       N       |      Y      |       Y       |     N      |
+
+4. [作用](https://www.codercto.com/a/4917.html)
+
+   - **实现隐藏, 封装性**
+   - _利用内部类实现**多重继承**_:
+     1. 相当于持有属性(组合原则)
+     2. 并不友好, 不要这么使用
+   - 实现**回调**功能:
+     1. 内部类调用外部实例方法
+     2. 被继承和要实现接口有同一个方法-继承类且内部类实现病持有接口
+   - 非静态内部类拥有其所在外部类的所有元素的访问权限
+
+## 静态内部类
+
+1. intros
+
+   - 不依赖于外部类存在: 相当于外部类的一个静态对象属性
+   - 静态内部类可以有非静态属性
+   - 静态内部类只能操作外部类的非静态属性权限
+   - 外部类可以操作静态内部类的静态属性
+
+2. 创建
 
    ```java
-   public class InnerClassTest {
-       public class InnerClassA {
-       }
-   }
-   // usage
-   InnerClassTest innerClassTest = new InnerClassTest();
-   // TODO: what is the different between the two class?
-   CommonInner commonInner = innerClassTest.new CommonInner();
-   CommonInner commonInner2 = new CommonInner();
+   // 在外部类中：内部类名 name = new 内部类名();
+   InnerClass innerClass = new InnerClass()
+   // 在非外部类中: 外部类名.内部类名 name = new 外部类名.内部类名();
+   OuterClass.InnerClass inner = new OuterClass.InnerClass();
    ```
 
-### 2. Static Inner Class
-
-1. introduce:
-
-- 1. exist not depend on outer class.
-- 2. static inner class have no access to outer class, in addition to static member.
-- 3. outer class have access to all member of static inner class.
-- 4. static inner class can also used to new instance.
-- 5. static inner class can define un-static and static member.
-
-2. syntax
+3. sample
 
    ```java
-   public class InnerClassTest {
-       static class InnerClassA {
+   public class OuterClass {
+       private int op;
+       private static int sop;
+       private InnerClass innerClass = new InnerClass();
+       @Data
+       public static class InnerClass {
+           static int sp;
+           private int ip;
+           public void accessOp() {
+               log.info("out class properties: {}", sop);
+           }
+           public void method() {
+               int a = 3;
+               // 访问方法内部变量
+               log.info("{}", a);
+               // 访问内部类的成员变量
+               log.info("{}", this.a);
+               // 访问外部内的成员变量: error
+               // log.info("{}", OuterClass.this.a);
+          }
        }
    }
 
-   // usage
-   // There are no difference between the two class.
-   StaticInner staticInner = new InnerClassTest.StaticInner();
-   StaticInner staticInner2 = new StaticInner();
+   public static void main(String[] args) {
+       val a = OuterClass.InnerClass.sp;
+       OuterClass.InnerClass inner = new OuterClass.InnerClass();
+       inner.accessOp();
+       int ip = inner.getIp();
+   }
    ```
 
-### 3. Anonymous Inner Class
+## 常规内部类
 
-1. introduce
+1. intros
 
-- 1. anonymous in known as implements interface as parameter.
-- 2. anonymous inner class have all access to outer class.
-- 3. outer class have a no access to anonymous inner class:
-  - anonymous inner class can define property，and can only used in local,
-  - and cannot used in outer class due to no class name.
-- 4. even cannot create or get anonymous instance.
-- 5. anonymous just define implements and it will not execute besides call interface method.
-- 6. create anonymous for each interface method call.
+   - **内部类依赖于外部类存在**, 不能独立存在: 相当于非静态成员属性
+   - **内部类不能有静态成员**
+   - 内部类可以操作外部类属性
+   - ~~外内部类可以操作内部类属性~~: 不能吧
 
-2. syntax
+2. 创建
+
+   ```java
+   // 在外部类中：内部类名 name = new 内部类名();
+   InnerClass innerClass = new InnerClass()
+   // 在非外部类中: 外部类名.内部类名 name = new 外部类名().new 内部类名();
+   OuterClass.InnerClass inner = new OuterClass().new InnerClass();
+   ```
+
+3. sample
+
+   ```java
+   public class OuterClass {
+       private int op;
+       private static int sop;
+       private InnerClass innerClass = new InnerClass();
+
+       public class InnerClass {
+           // inner class cannot contains static properties.
+           // private static int p;
+           private int ip;
+           public void accessOp() {
+               log.info("out class properties: {}-{}", op, sop);
+           }
+           public void method() {
+               int a = 3;
+               // 访问方法内部变量
+               log.info("{}", a);
+               // 访问内部类的成员变量
+               log.info("{}", this.a);
+               // 访问外部内的成员变量
+               log.info("{}", OuterClass.this.a);
+          }
+       }
+   }
+
+   public class Test {
+       OuterClass oclass = new OuterClass();
+       OuterClass.InnerClass inner = oclass.new InnerClass();
+   }
+   ```
+
+## 匿名内部类-anonymous
+
+1. intros
+
+   - 匿名内部类是内部类的一种, 匿名类可以作为实现**接口**的参数: _不能创建和实例化_
+   - 匿名内部类可以包含静态属性和非静态属性: 只能知己访问
+   - 匿名内部类可以操作外部类属性
+   - 外部类不能操作匿名内部类属性
+
+2. 创建
+
+   ```java
+   // 实现接口且没有类名, 比如 Consumer
+   (Object a) -> log.info(a.toString())
+   ```
+
+3. sample
 
    ```java
    interface AnonymousInterface {
@@ -85,52 +182,66 @@
    anonymousInterface.accept("obj1", (Object a) -> LOG.info(a.toString()));
    ```
 
-### 4. Local Inner Class
+## 局部内部类
 
-1. introduce
+1. intros
 
-- 1. local inner class have all access to outer class
-- 2. outer class have no access to local inner class.
+   - 局部内部类是内部类的一种, 是存在于方法内的类
+   - 不能使用 public/protected/private 修饰, final / abstract 可以
 
-2. syntax
+2. sample
 
    ```java
-   public class InnerClassTest {
-      public void anonymousClassTest() {
-          class LocalInner {
-          }
-      }
+   @Slf4j
+   public class OuterClass {
+       public int op;
+       public void getXx() {
+           int mp = 1;
+           final class LocalInner {
+               public int ip;
+               public void getX() {
+                   log.info("{}-{}-{}", op, mp, ip);
+               }
+           }
+       }
    }
    ```
 
-### 5. Nesting Inner Class
+## 内部类与字节码
 
-1. common inner class: cannot define static inner class
-2. static inner class: all type is fine
-3. anonymous inner class: cannot define static inner class
-4. local inner class: cannot define static inner class
+## 内部类与多继承
 
-### 6. Deep Understanding Inner Class
+## 内部类与内存泄漏
+
+---
+
+## reference
+
+1. https://blog.csdn.net/hacker_zhidian/article/details/82193100
+
+---
+
+## 6. Deep Understanding Inner Class
 
 1. test sample
 
-```java
-public class InnerClassTest {
+   ```java
+   public class InnerClassTest {
 
-    int field1 = 1;
-    private int field2 = 2;
+       int field1 = 1;
+       private int field2 = 2;
 
-    public InnerClassTest() {
-        InnerClassA inner = new InnerClassA();
-        int v = inner.x2;
-    }
+       public InnerClassTest() {
+           InnerClassA inner = new InnerClassA();
+           int v = inner.x2;
+       }
 
-    public class InnerClassA {
-        int x1 = field1;
-        private int x2 = field2;
-    }
-}
-```
+       public class InnerClassA {
+           int x1 = field1;
+           private int x2 = field2;
+       }
+   }
+   ```
 
 2. run `javac InnerClassTest.java` command in cmd, then can get two file: `InnerClassTest.class`, `InnerClassTest$InnerClassA.class`
 
@@ -184,7 +295,7 @@ public class InnerClassTest {
        // common inner class will have reference of outer class.
        final InnerClassTest this$0;
 
-       // constructor will accept a outer class paramter
+       // constructor will accept a outer class parameter
        public InnerClassTest$InnerClassA(InnerClassTest);
            Code:
            0: aload_0
@@ -240,7 +351,7 @@ public class InnerClassTest {
    }
    ```
 
-### 7. Inner Class and Multiple Inheritance
+## 7. Inner Class and Multiple Inheritance
 
 1. not allow multiple inheritance
 2. use class D to generate A, B, C: I think it more like factory rather than multiple inheritance
@@ -282,7 +393,7 @@ public class InnerClassTest {
    - Unless there is a very clear dependency between the two classes (such as a certain car and its special model of wheels), or one class exists to assist another class (such as the HashMap and its internal HashIterator class used to traverse its elements), then using the inner class at this time will have a better code structure and implementation effect.
    - In other cases, separate classes will have better code readability and code maintainability.
 
-### 8. Internal Class and Memory Leaks
+## 8. Internal Class and Memory Leaks
 
 1. Memory leak: there are some objects that can be recycled but not recycled for some reason
 
@@ -377,120 +488,12 @@ public class InnerClassTest {
 
 ---
 
-## sample
-
-1. refenrence
-
-2. code
-
-```java
-package basical;
-
-public class OuterClass {
-    private int a = 1;
-
-    // class 内部类可以使用修饰符修饰：Inner class可以声明为 private 或 protected
-
-    /**
-     * 说明：非静态内部类
-     */
-    public class InnerClass {
-        private int a;
-        public void method() {
-            int a = 3;
-            // 访问方法内部变量
-            System.out.println(a);
-            // 访问内部类的成员变量
-            System.out.println(this.a);
-            // 访问外部内的成员变量
-            System.out.println(OuterClass.this.a);
-            System.out.println("HelloWorld!I am InnerClass!");
-        }
-        public int getB() {
-            return a;
-        }
-        public void setB(int a) {
-            this.a = a;
-        }
-    }
-
-    /**
-     * 说明：静态内部类
-     */
-    public static class InnerClass2 {
-        private int a = 2; // 与外部内的成员变量同名
-        public void method() {
-            int a = 3;
-            // 访问方法内部变量
-            System.out.println(a);
-            // 访问内部类的成员变量
-            System.out.println(this.a);
-            // 访问外部内的成员变量
-            /* System.out.println(OuterClass.this.a); */
-
-            System.out.println("HelloWorld!I am static InnerClass!");
-        }
-        public int getB() {
-            return a;
-        }
-        public void setB(int a) {
-            this.a = a;
-        }
-    }
-
-    public int getA() {
-        return a;
-    }
-
-    public void setA(int a) {
-        this.a = a;
-    }
-}
-
-public class InnerClassTest {
-    public static main(String []args) {
-        OuterClass oc = new OuterClass();
-        //  静态内部类
-        InnerClass ic = oc.new InnerClass();
-        ic.method();//方法调用
-        // 静态内部类: 可以直接创建; 静态内部类不可以使用非静态成员
-        InnerClass2 ic2 = new InnerClass2();
-        ic2.method();//方法调用
-
-        // 內部類舉例：在类的内部直接创建一个Comparable接口的实现类对象[匿名内部类]
-        Comparable<Integer> comparable = new Comparable<Integer>() {
-            @Override
-            public int compareTo(Integer o) {
-                // TODO Auto-generated method stub
-                return 0;
-            }
-        };
-    }
-}
-```
-
 ---
 
-## conlusion
-
-1. inner class type: `-> means to get`
-
-|   type    | o -> i | i -> o | create instance | nest static inner class |
-| :-------: | :----: | :----: | :-------------: | :---------------------: |
-|  common   |   Y    |   Y    |        Y        |            N            |
-|  static   |   Y    |   N    |        Y        |            Y            |
-| anonymous |   N    |   Y    |        N        |            N            |
-|   local   |   N    |   Y    |  just in scope  |            N            |
+## conclusion
 
 2. understand about inner class:
 
    - 在外部类访问非静态内部类私有成员的时候, 会持有一个指向外部类引用的成员变量, 对应的内部类会生成一个静态方法, 用来返回对应私有成员的值,而外部类对象通过调用其内部类提供的静态方法来获取对应的私有成员的值.
    - 在非静态内部类访问外部类私有成员的时候, 对应的外部类会生成一个静态方法, 用来返回对应私有成员的值, 而内部类对象通过调用其外部类提供的静态方法来获取对应的私有成员的值.
-
    - 静态内部类访问外部类的成员时, 对应的外部类会生成一个静态方法, 用来返回对应私有成员的值, 而内部类对象不没有调用其外部类提供的静态方法来获取对应的成员的值.
-
----
-
-## Reference
-
-1. https://blog.csdn.net/hacker_zhidian/article/details/82193100
