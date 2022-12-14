@@ -135,6 +135,11 @@
    public static final String version = "1.0.31-SNAPSHOT";
    ```
 
+5. 天坑
+
+   - 与 lombok 一起使用时, 需要注意一定要优先执行直接的(pom 中依赖的顺序)
+   - processor 外不能有 <build/> 脚本
+
 ## 应用
 
 1. **功能声明 1**: `@Transactional` | `@RedisLimitRequest`
@@ -450,7 +455,11 @@
       Map memberMethods = (Map) hField.get(h);  // 注解的所有属性方法后可修改
    ```
 
-9. 编译时注解: @Data
+9. 编译时注解
+
+   - [@SeData](https://github.com/Alice52/tutorials-sample/blob/master/java/javase/javase-annotation/annotation-processor/src/main/java/cn/edu/ntu/java/annotations/SeData.java)
+   - [@Serial](https://github.com/Alice52/tutorials-sample/blob/master/java/javase/javase-annotation/annotation-processor/src/main/java/cn/edu/ntu/java/annotations/Serial.java)
+
 10. 相关工具类
 
     - AnnotatedElementUtils: 可以帮助我们找出 父类和接口、父类方法和接口方法上的注解, 并可以处理桥接方法, 实现一键找到继承链的注解
