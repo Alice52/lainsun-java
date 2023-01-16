@@ -16,6 +16,18 @@
       "path": "programming",
       "name": "programming"
     },
+    {
+      "path": "linux",
+      "name": "linux-tutorial"
+    },
+    {
+      "path": "nginx",
+      "name": "nginx-tutorial"
+    },
+    {
+      "path": "mq",
+      "name": "mq-tutorial"
+    },
   ],
   "settings": {
     "files.exclude": {

@@ -3,6 +3,9 @@
     "database": true,
     "http": true,
     "programming": true,
+    "nginx": true,
+    "linux": true,
+    "mq": true,
     "repo.code-workspace": false
   }
 }
