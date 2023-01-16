@@ -6,6 +6,7 @@
     "nginx": true,
     "linux": true,
     "mq": true,
+    "rpc/grpc": true,
     "repo.code-workspace": false
   }
 }
