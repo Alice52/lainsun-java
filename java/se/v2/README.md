@@ -1,10 +1,10 @@
 [toc]
 
-# Java Se
+1. 反射、注解、泛型 是框架层面非常常用的解决代码重复和通用性的方案
 
-1. overview
+## overview
 
-   ![avatar](/static/image/java/se/se-overview.png)
+![avatar](/static/image/java/se/se-overview.png)
 
 ## 常见的对象
 
