@@ -34,7 +34,10 @@
       "database": true,
       "http": true,
       "programming": true,
-      "repo.code-workspace": true
+      "nginx": true,
+      "linux": true,
+      "mq": true,
+      "repo.code-workspace": false
     }
   }
 }
