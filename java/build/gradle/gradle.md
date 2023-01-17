@@ -1,157 +1,186 @@
 [toc]
 
-## introduce
+## overview
 
-1. content
+1. introduce
 
-   - groovy syntax
-   - build script block
-   - gradle api
+   - gradle location: `~/.gradle/wrapper/dists/`
+   - gradle user home: 默认是 `~/.gradle`
+   - jar repo: `~/.gradle/caches` (`/.gradle/caches/modules-2/files-2.1`)
 
-2. feature
+2. pros & cons
 
-   - 灵活性
-   - 粒度细
-   - 扩张性好: plugin
-   - 兼容性: ant / maven
+   - pros: 粒度细
+   - pros: 灵活性: 自定义程度高, 脚本语言比 xml 功能强大
+   - pros: 扩张性好: plugin
+   - pros: 兼容性: ant / maven
+   - cons: 学习门口极大 & 且官方 api 老是变换
 
-3. 目录结构
+3. script language
 
-   ```txt
-   ├─ build.gradle                          // build script
-   ├─ gradlew                               // gradlew
-   ├─ gradlew.bat
-   ├─ settings.gradle                       // init
-   ├─.gradle
+   - **kotlin**: 后期以此为核心
+   - groovy
+
+4. dir layout
+
+   ```js
+   ├─ settings.gradle                       // 1. init
+   ├─ build.gradle                          // 2. build script
+   ├─ gradlew | gradlew.bat                 // 3. gradlew
+   ├─gradle                                 // 4. wrapper{version}
+   │  └─wrapper
+   │     ├─ gradle-wrapper.jar
+   │     └─ gradle-wrapper.properties
+   │
+   ├─ src                                   // 5. source code
+   │    ├── main
+   │    │   ├── generated
+   │    │   ├── java
+   │    │   ├── kotlin
+   │    │   └── resources
+   │    └── test
+   │        ├── java
+   │        ├── kotlin
+   │        └── resources
+   │
+   ├─build                                  // 5. build output
+   │  ├─libs
+   │  │  └── xxx-1.0-SNAPSHOT.jar
+   │  └─tmp
+   │
+   ├─.gradle                                // 6. project config
    │  ├─5.2.1
    │  ├─buildOutputCleanup
    │  └─vcs-1
-   ├─build                                  // build output
-   │  ├─libs
-   │  └─tmp
-   ├─gradle                                 // for gradlew
-   │  └─wrapper
-   │     ├─ gradle-wrapper.jar
-   │     ├─ gradle-wrapper.properties
    ```
 
-4. lifecycle: `gradle wrapper` 初始化 gradle 环境
+5. gradle vs maven
 
-   ![avatar](/static/image/common/gradle/gralde.png)
+## [command](https://docs.gradle.org/current/userguide/command_line_interface.html)
 
-   - 初始化阶段
-   - 配置阶段
-   - 执行阶段
+1. install: 2
 
-   ![avatar](/static/image/common/gradle/gralde-build.png)
+   - apt/yum 等安装: 自定义安装
+   - 根据项目的 gradle/wrapper 的版本进行下载: 下载目录`~/.gradle/wrapper/dists/`
+   - `gradle -v`
+
+2. `gradle --help`
+3. gradle init: 初始化项目
+
+   ```js
+   .
+   ├── build.gradle
+   ├── gradle
+   │   └── wrapper
+   │       ├── gradle-wrapper.jar
+   │       └── gradle-wrapper.properties
+   ├── gradlew
+   ├── gradlew.bat
+   └── settings.gradle
+   ```
+
+4. gradle wrapper: 固定项目的版本(**`idea#gradle 设置`**)
+
+   ```js
+   gradle wrapper --gradle-version=4.4
+   .
+   ├── gradle
+   │   └── wrapper
+   │       ├── gradle-wrapper.jar
+   │       └── gradle-wrapper.properties
+   ├── gradlew
+   └── gradlew.bat
+   ```
+
+5. simple flow as maven
+
+   ```shell
+   gradle clean                                      # mvn clean
+   gradle compileJava                                 # mvn compile
+   gradle build                                      # mvn package
+   gradle clean build -x test --console=plain          # mvn clean package -DskipTests=true
+   ```
+
+### daemon
+
+1. 这个是 gradle 快的核心原因
+
+   - 后台挂了一个 daemon(默认 3 小时), 所有人共用: 没有时(第一次)会创建, 会执行加载相关 jar 等好资源和时间的操作
+   - 执行 gradle 命令时, 会启动一个超轻量的客户端 jvm
+   - 该 client-jvm 会将所有命令直接转给 daemon jvm
+   - **maven: 是每次都启动一个新的 jvm 并加载相关资源**
+
+2. command
+
+   ```shell
+   # 停止 daemon jvm, 收回资源
+   gradle --stop
+   # 不使用 daemon jvm
+   gradle build --no-daemon
+   ```
+
+## repo
+
+1. buildscript: 构建项目中可能使用 jar 包, 需要指定 repo 地址
+2. allprojects: 所有项目中使用的 jar 包, 需要指定 repo 地址
+3. subprojects: 所有子项目中使用 jar 包, 需要指定 repo 地址
 
    ```groovy
-
-   /*===================== lifecycle ========================*/
-   /**
-   * 配置阶段之前的监听回调
-   */
-   this.beforeEvaluate {}
-
-   /**
-   * * 配置阶段之后的监听回调
-   */
-   this.afterEvaluate {}
-
-   /**
-   * gradle 执行完毕之后的监听
-   */
-   this.gradle.buildFinished {
-       getAllProjects()
+   repositories {
+       maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+       maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+       maven { url 'https://maven.aliyun.com/repository/google' }
+       maven { url 'https://maven.aliyun.com/repository/jcenter' }
+       mavenCentral()
+       jcenter()
    }
-
-   def getAllProjects() {
-       this.getSubprojects().eachWithIndex { Project project, int i ->
-           println "get-subprojects: ${project.name}"
-       }
-   }
-
-   /**
-   * beforeEvaluate
-   */
-   this.gradle.beforeProject {
-   }
-
-   /**
-   * afterEvaluate
-   */
-   this.gradle.afterProject {}
-
-   // add listener for monitor
    ```
 
-5. 监听阶段
-
-   ```groovy
-   /**
-    * 配置阶段之前的监听回调
-    */
-    this.beforeEvaluate {}
-
-    /**
-    * * 配置阶段之后的监听回调
-    */
-    this.afterEvaluate {}
-
-    /**
-    * gradle 执行完毕之后的监听
-    */
-    this.gradle.buildFinished {}
-   ```
+| 科目 |   分数   | 总分 | delta | 提升 |
+| :--: | :------: | :--: | :---: | :--: |
+| 语文 | 100 左右 | 140  |  40   |  Y   |
+| 数学 | 125 左右 | 140  |  15   |  -   |
+| 英语 |   125    | 140  |  15   |  N   |
+| 物理 |    75    |  80  |   5   |  N   |
+| 化学 |    55    |  60  |   5   |  N   |
+| 政治 |    40    |  50  |  10   |  -   |
+| 历史 |    40    |  50  |  10   |  -   |
 
 ## dependency
 
-1. implementation
-
-   - 对该项目有依赖的项目将无法访问到使用该命令编译的依赖中的任何程序[也就是将该依赖隐藏在内部]
-   - A 依赖 B, B 依赖 C, 如果 B 依赖 C 是使用的 implementation 依赖, 那么在 A 中是访问不到 C 中的方法的[如果需要访问, 请使用 api(compile)依赖]
-
-2. compile/api
-
-   - 编译和打包
-
-3. providedCompile
-
+1. **implementation**: 编译和打包, **不能传递的依赖**
+   - A 依赖 B, B 依赖 C, 如果 B 依赖 C 是使用的 implementation 依赖
+   - 那么在 A 中是访问不到 C 中的方法的[如果需要访问, 请使用 api(compile)依赖]
+2. **compile**/api
+   - 编译和打包, **且可以在项目键传递**
+3. `compileOnly == 等价 maven#provide`
    - 仅在编译的时候需要, 但是在运行时不需要依赖
+4. apk/runtime/runtimeOnly
+   - ~~只在生成 apk 的时候参与打包, 编译时不会参与, 很少用~~
+5. testCompile/testImplementation
+   - 只在单元测试代码的编译以及最终打包测试 apk 时有效
+6. debugCompile/debugImplementation
+   - 只在 debug 模式的编译和最终的 debug 打包时有效
+7. releaseCompile/releaseImplementation
+   - 仅仅针对 Release 模式的编译和最终的 Release 打包
+8. annotationProcessor
+   - 处理编译时注解
+9. classpath: 很少使用
+10. ??look up dependencies?? what's this?
 
-4. debugCompile (debugImplementation)
+    ```groovy
+    gradle :{module}:dependencies
+    gradle :{module}:dependencies --configuration compile
+    gradle :{module}:dependencies --configuration compileOnly
+    gradle :{module}:dependencies --configuration runtime
+    gradle :{module}:dependencies --configuration testCompile
+    gradle :{module}:dependencies --configuration testCompileOnly
+    gradle :{module}:dependencies --configuration testRuntime
+    ```
 
-   - debugCompile 只在 debug 模式的编译和最终的 debug 打包时有效
+## build
 
-5. releaseCompile (releaseImplementation)
-
-   - releaseCompile 仅仅针对 Release 模式的编译和最终的 Release 打包
-
-6. testCompile (testImplementation)
-
-   - testCompile 只在单元测试代码的编译以及最终打包测试 apk 时有效。
-
-7. apk(runtimeOnly）
-
-   - 只在生成 apk 的时候参与打包, 编译时不会参与, 很少用
-
-8. runtime
-
-   - 仅在运行的时候需要, 但是在编译时不需要依赖
-
-9. look up dependencies
-
-   ```groovy
-   gradle :{module}:dependencies
-   gradle :{module}:dependencies --configuration compile
-   gradle :{module}:dependencies --configuration compileOnly
-   gradle :{module}:dependencies --configuration runtime
-   gradle :{module}:dependencies --configuration testCompile
-   gradle :{module}:dependencies --configuration testCompileOnly
-   gradle :{module}:dependencies --configuration testRuntime
-   ```
-
-## project
+### project
 
 1. project api
 
@@ -323,12 +352,9 @@
            }
        }
    }
-
-
-
    ```
 
-## task
+### task
 
 1. 创建: task 会被 TaskContainer 统一管理
 
@@ -366,6 +392,95 @@
 3. task type
 
    - https://docs.gradle.org/current/dsl/org.gradle.api.tasks.Copy.html
+
+### lifecycle
+
+1. lifecycle: `gradle wrapper` 初始化 gradle 环境
+
+   ![avatar](/static/image/common/gradle/gralde.png)
+
+   - 初始化阶段
+   - 配置阶段
+   - 执行阶段
+
+   ![avatar](/static/image/common/gradle/gralde-build.png)
+
+   ```groovy
+
+   /*===================== lifecycle ========================*/
+   /**
+   * 配置阶段之前的监听回调
+   */
+   this.beforeEvaluate {}
+
+   /**
+   * * 配置阶段之后的监听回调
+   */
+   this.afterEvaluate {}
+
+   /**
+   * gradle 执行完毕之后的监听
+   */
+   this.gradle.buildFinished {
+       getAllProjects()
+   }
+
+   def getAllProjects() {
+       this.getSubprojects().eachWithIndex { Project project, int i ->
+           println "get-subprojects: ${project.name}"
+       }
+   }
+
+   /**
+   * beforeEvaluate
+   */
+   this.gradle.beforeProject {
+   }
+
+   /**
+   * afterEvaluate
+   */
+   this.gradle.afterProject {}
+
+   // add listener for monitor
+   ```
+
+### hook
+
+1. 监听阶段
+
+   ```groovy
+   /**
+    * 配置阶段之前的监听回调
+    */
+    this.beforeEvaluate {}
+
+    /**
+    * * 配置阶段之后的监听回调
+    */
+    this.afterEvaluate {}
+
+    /**
+    * gradle 执行完毕之后的监听
+    */
+    this.gradle.buildFinished {}
+   ```
+
+## plugin
+
+1. 构建逻辑的复用
+2. 简单插件
+3. script 插件
+4. buildSrc 插件
+5. 发布插件
+
+## practice
+
+1. casino
+2. project-ec
+3. **gradle jmeter**
+
+---
 
 ## others
 
