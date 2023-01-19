@@ -7,9 +7,6 @@ url = git@github.com:Alice52/programming.git
 [submodule "http"]
 path = http
 url = git@github.com:Alice52/http.git
-[submodule "linux-tutorial"]
-path = linux
-url = git@github.com:Alice52/linux-tutorial.git
 [submodule "nginx"]
 path = nginx
 url = git@github.com:Alice52/nginx-tutorial.git
