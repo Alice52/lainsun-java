@@ -4,6 +4,8 @@
 
 ### elastic job
 
+### xxl-job
+
 ## type
 
 1. delay job

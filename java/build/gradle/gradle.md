@@ -495,3 +495,9 @@
        gradleVersion = '5.2.1' // version required
    }
    ```
+
+---
+
+## reference
+
+1. https://www.bilibili.com/video/BV1DE411Z7nt
