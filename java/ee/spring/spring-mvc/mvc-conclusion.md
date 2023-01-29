@@ -21,3 +21,7 @@
    POJO persist to PO
    comnine PO to VO or DTO
    ```
+
+## reference
+
+1. https://mp.weixin.qq.com/s?__biz=MzI1NTE3OTk4Nw==&mid=2653738430&idx=1&sn=63c0980766d1a474f39f6a1b37fbe7ca
