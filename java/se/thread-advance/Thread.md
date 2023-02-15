@@ -618,12 +618,23 @@
    - java8 新增, 使用目前机器上可以的处理器作为他的并行级别
 
 6. executor.shutdown();
-7. submit()/execute()
-   - execute() 参数 Runnable
-   - excute(Ruunable x)没有返回值. 可以执行任务
-   - submit() 参数(Ruunable)或(Ruunable 和结果)或(callable)
-   - submit(Callable x)有返回值, 返回一个 Future 类的对象
-   - submit() 方便 Exception 处理
+7. submit()/**execute**()
+   - 阻塞: 都不阻塞
+   - 参数: execute(Runnable) | submit(XX) 最终都会包装成 RunnableFuture
+   - 返回值: excute() 没有返回值 | submit() 存在返回值
+   - 异常: excute() 的异常信息会被 Thread.UncaughtExceptionHandler 处理 | submit 的异常信息会被封装到 Feature 内, 使用 get 会抛出
+8. 线程池异常处理
+   - 手动 try..catch
+   - ThreadPoolExecutor#afterExecute
+   - UncaughtExceptionHandler: 不配置的话也会 log 出异常(默认只在控制台)
+     - 处理异常的顺序:
+       1. 当前线程有异常处理器
+       2. 当前线程所属的线程组有异常处理器
+       3. 全局默认的 DefaultUncaughtExceptionHandler: 只会出现在 console, log 文件中没有
+       4. 子线程就直接退出: 此时会出现逻辑没有执行, 且没有捕获异常的 log
+   - Thread.setUncaughtExceptionHandler 设置当前线程的异常处理器
+   - Thread.setDefaultUncaughtExceptionHandler 为整个程序设置默认的异常处理器
+   - Future 的 get/join 可以把异常直接抛出来
 
 #### 线程池-ThreadPoolExecutor
 
