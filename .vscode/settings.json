@@ -7,6 +7,7 @@
     "linux": true,
     "mq": true,
     "rpc": true,
+    "job": true,
     "rpc/grpc": true,
     "repo.code-workspace": false
   }

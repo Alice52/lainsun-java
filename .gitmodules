@@ -19,3 +19,6 @@ url = git@github.com:Alice52/mq-tutorial.git
 [submodule "rpc/grpc"]
 path = rpc/grpc
 url = git@github.com:Alice52/grpc-tutorial.git
+[submodule "job"]
+	path = job
+	url = git@github.com:Alice52/job.git
