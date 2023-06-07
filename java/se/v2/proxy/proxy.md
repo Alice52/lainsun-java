@@ -117,7 +117,9 @@
 
 ## 动态代理-jdk 代理
 
-1. core: 使用 Proxy 动态创建代理对象, 之后对代理对象进行代理
+1. core
+   - 使用 Proxy 动态创建代理对象, 之后对代理对象进行代理
+   - 基于接口实现的, 创建接口的代理类实现对目标的增强, 不能修改字节码(运行时)
 2. Proxy.newProxyInstance(ClassLoader, Class<?>[], InvocationHandler)
 
    ```java
@@ -207,7 +209,11 @@
 
 ## 动态代理-cglib 代理
 
-1. sample
+1. core
+
+   - 基于 ASM 的字节码处理库, 在 jvm 启动时动态生成 Java 子类(重写方法并实现增强): aop 为典型应用
+
+2. sample
 
    ```java
    public class CglibCalculatorProxy implements MethodInterceptor {

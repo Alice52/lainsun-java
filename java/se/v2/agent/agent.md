@@ -1,3 +1,5 @@
+[toc]
+
 ## agent
 
 1. diagram
@@ -40,9 +42,50 @@
            </plugin>
        </plugins>
    </build>
+
+   <!-- or -->
+   <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-shade-plugin</artifactId>
+       <executions>
+           <execution>
+               <phase>package</phase>
+               <goals>
+                   <goal>shade</goal>
+               </goals>
+               <configuration>
+                   <transformers>
+                       <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                           <manifestEntries>
+                               <Premain-Class>cn.edu.ntu.java.javase.agent.IntegrationAgent</Premain-Class>
+                           </manifestEntries>
+                       </transformer>
+                   </transformers>
+               </configuration>
+           </execution>
+       </executions>
+   </plugin>
    ```
 
-4. core method: 重新加载一个类的方式
+4. premain
+
+   ```java
+   class XxAgent {
+     // 使用 --javaagent启动时, 会对所有的类加载操作进行拦截
+     // arg: 与 --javaagent 一同传入的参数
+     // instrumentation: jvm 传入, 可以操作类的定义等
+     public static void premain(String arg, Instrumentation instrumentation) {
+       // addTransformer(xx)
+     }
+
+     // 如果上一个不存在则会执行这个, 否则不会执行
+     public static void premain(String arg) {
+       // addTransformer(xx)
+     }
+   }
+   ```
+
+5. core method: 重新加载一个类的方式
 
    - 在第一次加载时拦截： `addTransformer`[cannot add method]
 
@@ -80,7 +123,7 @@
 
 ## javassist
 
-1. javassist(asm) 是一个开源的[jboss]分析, 编辑和创建 java 字节码的类库
+1. javassist(asm) 是一个开源的[jboss]分析, 编辑和创建 java 字节码的类库(简化上述的操作)
 
 2. dependency
 
@@ -149,7 +192,7 @@
    - 硬编码
    - aop
    - 公共组件埋点
-   - **字节码插桩埋点**
+   - 字节码修改(插桩埋点): asm(底层 api+性能好+cglib) | assist(上层 api+易使用) | bytebuddy(上层 api+易使用+性能好+apm)
 
 2. 方法采集只能是 pubic 的非 static, 非 abstract, 非 native
 3. 采用**通配符**或正则表达式
@@ -157,7 +200,7 @@
    - ?:表示单个字符
    - &: 分割多个匹配语句
 
-## 数据采集
+## 数据采集(链路追踪)
 
 1. service
 
@@ -211,3 +254,9 @@
      ![avatar](/static/image/java/javaee-trace-session.png)
 
 4. arthas 就是基于 JDK instrument{提供了对 jvm 底层组件访问的能力}, 通过 ASM 等字节码增强计数来实现 增强和热替
+
+---
+
+## reference
+
+1. https://www.bilibili.com/video/BV1pU4y1W74V/
