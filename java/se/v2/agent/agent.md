@@ -1,6 +1,16 @@
 [toc]
 
-## agent
+## overview
+
+1. 字节码修改相关的技术
+
+   - asm(底层 api+性能好): cglib(enhancer) - spring
+   - javasasist(上层 api+易使用)
+   - bytebuddy(上层 api+易使用+性能好+apm): skywalking
+
+2. agent 技术是`非侵入式`监控及追踪的核心: `--javaagent:xx.jar=xx`
+
+## java agent(jvm)
 
 1. diagram
 
@@ -185,21 +195,6 @@
 
 ---
 
-## expand
-
-1. 监控系统采集信息的埋点
-
-   - 硬编码
-   - aop
-   - 公共组件埋点
-   - 字节码修改(插桩埋点): asm(底层 api+性能好+cglib) | assist(上层 api+易使用) | bytebuddy(上层 api+易使用+性能好+apm)
-
-2. 方法采集只能是 pubic 的非 static, 非 abstract, 非 native
-3. 采用**通配符**或正则表达式
-   - \*: 表示一个或多个任意字符
-   - ?:表示单个字符
-   - &: 分割多个匹配语句
-
 ## 数据采集(链路追踪)
 
 1. service
@@ -259,4 +254,5 @@
 
 ## reference
 
-1. https://www.bilibili.com/video/BV1pU4y1W74V/
+1. [javaagent](https://www.bilibili.com/video/BV1pU4y1W74V/)
+2. [bytebyddy](https://www.bilibili.com/video/BV1Jv4y1a7Kw/)
