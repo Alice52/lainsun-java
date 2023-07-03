@@ -112,24 +112,65 @@ class SubClass extends SuperClass {
 
 ### Sequence of execution at initialization
 
-- **`静态优先, 父类优先, 初始化实例变量, 动态代码块, 构造函数`**
-- 口诀： `从父到子， 模板先有； 静态加载， 只有一次`
+1. **`静态优先, 父类优先, 初始化实例变量, 动态代码块, 构造函数`**
 
-```java
-1. 初始化父类静态属性
-2. 执行父类静态代码块
-3. 初始化子类静态属性
-4. 执行子类静态代码块
+   - 口诀： `从父到子， 模板先有； 静态加载， 只有一次`
 
-5. 初始化父类实例变量
-6. 执行父类动态代码块
-7. 执行父类构造方法
-8. 初始化子类实例变量
-9. 执行子类动态代码块
-10. 执行子类构造方法
+     ```java
+     1. 初始化父类静态属性
+     2. 执行父类静态代码块
+     3. 初始化子类静态属性
+     4. 执行子类静态代码块
 
-// 构造方法之后才是一般方法
-```
+     5. 初始化父类实例变量
+     6. 执行父类动态代码块
+     7. 执行父类构造方法
+     8. 初始化子类实例变量
+     9. 执行子类动态代码块
+     10. 执行子类构造方法
+
+     // 构造方法之后才是一般方法
+     ```
+
+2. 静态内部类
+
+   - 在**调用**静态内部类的时加载(内部类也是): 且会优先加载其外部类
+   - 只使用外部类是不会触发内部类的加载的
+
+3. code
+
+   ```java
+   // 构造块
+   // 构造函数
+
+   // 构造块
+   // 构造函数
+
+   // 静态块
+
+   // 构造块
+   // 构造函数
+   public class StaticTest {
+      public static StaticTest t1 = new StaticTest();
+      public static StaticTest t2 = new StaticTest();
+
+      public StaticTest() {
+         System.out.println("构造函数");
+      }
+
+      {
+         System.out.println("构造块");
+      }
+
+      static {
+         System.out.println("静态块");
+      }
+
+      public static void main(String[] args) {
+         StaticTest t = new StaticTest();
+      }
+   }
+   ```
 
 ### Properties
 
