@@ -1,3 +1,5 @@
+// todo: split to alone repo later
+
 ## 性能调优
 
 1. 简介: `测试-分析-调优-测试`
