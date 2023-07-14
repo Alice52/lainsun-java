@@ -9,6 +9,7 @@
     "rpc": true,
     "job": true,
     "rpc/grpc": true,
+    "optimize": true,
     "repo.code-workspace": false
   }
 }

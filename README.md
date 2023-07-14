@@ -1,6 +1,15 @@
-```diff
-- `约定 > 配置 > 编码`
-```
+> **Note**
+> 约定 > 配置 > 编码
+
+> **Note**
+> 工具 > 约定 > 文档
+
+## knowledge flow
+
+1. [java-ocean](https://github.com/Alice52/java-ocean): pure knowledge
+2. [tutorial](https://github.com/Alice52/tutorials): sample
+3. [project](https://github.com/Alice52/project): usage
+4. [practice](https://github.com/Alice52/practice): practice
 
 ### struct
 
@@ -15,34 +24,18 @@
 2. java
    - build
    - se
-   - ee
-   - optimize: tbd
+   - ee@repo
+   - optimize@repo
 3. distribute
-   - TDB
-4. mq
-5. job
-6. linux
-   - shell
-   - docker
-   - k8s
-   - elk
-7. rpc
-8. ddd
-9. gifts
-10. python
-11. nginx
+   - todo: split later
+4. ddd
+5. gifts
+6. mq@repo
+7. job@repo
+8. linux@repo
+9. rpc@repo
+10. python@repo
+11. nginx@repo
 12. http@repo
 13. programming@repo
 14. database@repo
-    - mysql
-    - redis
-    - mongodb: wip
-    - es: wip
-    - tidb: wip
-
-## knowledge flow
-
-1. [java-ocean](git@github.com:Alice52/java-ocean.git): pure knowledge
-2. [tutorial-sample](git@github.com:Alice52/tutorials-sample.git): sample
-3. [project](git@github.com:Alice52/project.git): usage
-4. [practice]git@github.com:Alice52/practice.git): practice
