@@ -1,15 +1,1 @@
-// todo: split to alone repo later
-
-## 性能调优
-
-1. 简介: `测试-分析-调优-测试`
-
-   - 调优标准
-   - 调优策略
-
-2. java 性能调优
-3. 多线程性能调优
-4. jvm 监控性能调优
-5. 设计模式性能调优
-6. 数据库性能调优
-7. 案例讲解
+- these content hold by [optimize](https://github.com/Alice52/optimize)
