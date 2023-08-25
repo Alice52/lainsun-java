@@ -168,6 +168,9 @@
     gradle :{module}:dependencies --configuration testRuntime
     ```
 
+11. 如果出现依赖冲突, gradle **会选取最高版本使用**
+12. 排除依赖时需要在最外层排除(在引入的那一层)
+
 ## build
 
 ### project

@@ -635,6 +635,7 @@
    - Thread.setUncaughtExceptionHandler 设置当前线程的异常处理器
    - Thread.setDefaultUncaughtExceptionHandler 为整个程序设置默认的异常处理器
    - Future 的 get/join 可以把异常直接抛出来
+   - **CF 下的只能使用 exceptionally 中获取异常**
 
 #### 线程池-ThreadPoolExecutor
 
