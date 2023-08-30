@@ -624,6 +624,7 @@
    - 返回值: excute() 没有返回值 | submit() 存在返回值
    - 异常: excute() 的异常信息会被 Thread.UncaughtExceptionHandler 处理 | submit 的异常信息会被封装到 Feature 内, 使用 get 会抛出
 8. 线程池异常处理
+
    - 手动 try..catch
    - ThreadPoolExecutor#afterExecute
    - UncaughtExceptionHandler: 不配置的话也会 log 出异常(默认只在控制台)
@@ -635,7 +636,13 @@
    - Thread.setUncaughtExceptionHandler 设置当前线程的异常处理器
    - Thread.setDefaultUncaughtExceptionHandler 为整个程序设置默认的异常处理器
    - Future 的 get/join 可以把异常直接抛出来
-   - **CF 下的只能使用 exceptionally 中获取异常**
+   - **CF 下的只能使用 exceptionally 中获取异常**: 在内部被 catch 过
+
+9. 线程池内线程出现非捕获异常: 线程池的稳定性和可靠性(不会使线程减少)
+
+   - 异常捕获: 线程池会捕获线程抛出的异常, 防止异常传播到线程外部导致程序中断
+   - 线程移除(即使指定线程的异常处理器): 异常发生后, 线程池会将出现异常的线程从线程池中移除, 以避免该线程继续执行其他任务
+   - 线程替换: 线程池会创建一个新的线程来替换被移除的异常线程, 以保持线程池的稳定性和预设的线程数量
 
 #### 线程池-ThreadPoolExecutor
 
