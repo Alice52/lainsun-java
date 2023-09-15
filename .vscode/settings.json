@@ -8,6 +8,7 @@
     "mq": true,
     "rpc": true,
     "job": true,
+    "oauth": true,
     "rpc/grpc": true,
     "optimize": true,
     "repo.code-workspace": false
