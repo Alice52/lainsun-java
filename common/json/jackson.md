@@ -478,8 +478,40 @@ public void testHello() throws IOException {
      - Java 在编译时会在字节码里指令集之外的地方保留「部分」泛型信息
      - **泛型接口**、`类`、**方法**定义上的所有泛型、`成员变量声明处`的泛型「都会」被保留类型信息,「其它地方」的泛型信息都会被擦除
    - solution
+
      - 利用成员变量保留泛型
      - TypeReference<T>
+
+       ```java
+       // it's failed: T will be HashLinkMap!!!
+       <T> T requestShopperTrak(String startTime, DetailEnum d) {} // TypeReference
+       StoreTrafficDTO dto = requestShopperTrak(startTime, DetailEnum.STORE)
+
+       // it's ok!!
+        <T> T requestShopperTrak(String startTime, DetailEnum d, Class<T> clazz) {} // Class
+        StoreTrafficDTO dto = requestShopperTrak(startTime, DetailEnum.STORE, StoreTrafficDTO.class)
+       ```
+
+   - sample
+
+     ```java
+     public class JsonResponse<T> {
+        private T result;
+     }
+     public class User {
+        private Long id;
+        private String firstName;
+        private String lastName;
+     }
+
+     // {"result":{"id":1,"firstName":"John","lastName":"Lewis"}}
+
+     TypeReference<JsonResponse<User>> typeRef = new TypeReference<JsonResponse<User>>() {};
+     JsonResponse<User> jsonResponse = objectMapper.readValue(json, typeRef);
+
+     JavaType javaType = objectMapper.getTypeFactory().constructParametricType(JsonResponse.class, User.class);
+     JsonResponse<User> jsonResponse = objectMapper.readValue(json, javaType);
+     ```
 
 4. tree
    - 序列化
