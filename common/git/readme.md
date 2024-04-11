@@ -16,8 +16,6 @@
 2. type: angular style
 
    - **perf**: 改进性能
-   - **modify**: 修改功能
-   - **delete**: 删除代码
    - build: 构建流水线
    - refactor
    - style: 不影响代码含义的修改(如 formart)
@@ -30,6 +28,8 @@
    - feat: 心功能
    -
    - ci: 自动化流程
+   - ~~**modify**: 修改功能~~
+   - ~~**delete**: 删除代码~~
 
 3. release with github action
 
